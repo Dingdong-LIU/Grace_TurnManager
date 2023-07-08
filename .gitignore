@@ -1,3 +1,6 @@
+### Gitignore for devcontainer in Vscode
+.devcontainer
+
 ### Gitignore for python project
 # Byte-compiled / optimized / DLL files
 __pycache__/
