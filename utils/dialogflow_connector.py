@@ -23,7 +23,7 @@ class DialogflowConnector:
             },
             timeout=3,
         )
-        self.logger.debug("Received replies from chatbot: %s", str(response.json()), exc_info=True)
+        self.logger.debug("Received replies from chatbot: %s", str(response.json()))
         return response.json()
 
     def fake_response(self, asr_text) -> dict:
@@ -43,5 +43,5 @@ class DialogflowConnector:
                 "text" : "This is a fake reponse from Grace. You must have waited for 1.5 seconds!"
             }
         }
-        self.logger.debug("Received replies from chatbot: %s", str(response), exc_info=True)
+        self.logger.debug("Received replies from chatbot: %s", str(response))
         return response
