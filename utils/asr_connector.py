@@ -25,7 +25,7 @@ class ASR_Word_Stream:
         self.word = ""
         self.timestamp = 0
         self.new_word = False
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger(__name__)
 
     def callback(self, msg) -> None:
         self.word = msg.utterance
@@ -65,7 +65,7 @@ class ASR_Full_Sentence:
             "lang" : "", "confidence": 0,
             "source" : "", "audio_path": "",
         }
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger(__name__)
 
         self.new_sentence = False
         self.timestamp = 0
