@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import Union, Optional
+from typing import Union, Optional, Literal
 import logging
 import time
 import threading
@@ -52,13 +52,37 @@ class Turn:
         # property data
         # could be "not_owned", "robot_turn", "human_turn"
         self.ownership = ownership
+        # engagement level
+        self.engagement_level = "undefined"
+
+    def get_engagement_level(self) -> Literal['undefined', 'agitated', 'distracted', 'engaged']:
+        """
+        This function will update and return the engagement level of the turn.
+
+        Returns:
+            str: engagement level, can be {'engaged', 'distracted', 'agitated', 'undefined'}
+        """
+        emotion = self.get_emotion()
+        attention = self.get_attention()
+
+        if emotion in ["Absence", "EXCEPTION!!", ""] or attention == "":
+            # engagement level undefined if this module is turned off
+            self.engagement_level = "undefined"
+        elif emotion in ["Anger", "Agitation"]:
+            self.engagement_level = "agitated"
+        elif attention == "False":
+            self.engagement_level = "distracted"
+        else:
+            self.engagement_level = "engaged"
+
+        return self.engagement_level
 
     def get_attention(self) -> str:
         """
         This function will return the attention of the turn. The attention is the most frequent attention in the attention input.
 
         Returns:
-            str: attention
+            str: attention, can be "True" or "False";
         """
         attention = Counter(self.attention_input).most_common(1)[0][0]
         return attention
@@ -69,7 +93,7 @@ class Turn:
         This function will return the emotion of the turn. The emotion is the most frequent emotion in the emotion input.
 
         Returns:
-            str: emotion
+            str: emotion, can be {'Anger', 'Contempt', 'Agitation' ('Disgust', 'Fear'), 'Happiness', 'Neutral', 'Sadness', 'Surprise', "Abscence"(no face), "EXCEPTION!!"(didn't track patient)}
         """
         emotion = Counter(self.emotion_input).most_common(1)[0][0]
         return emotion
