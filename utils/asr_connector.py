@@ -38,6 +38,9 @@ class ASR_Word_Stream:
         self.new_word = False
         return output
 
+    def get_current_sentence(self):
+        return self.word
+
 
 class ASR_Sentence_Stream:
     def __init__(self) -> None:
@@ -110,3 +113,9 @@ class ASR_Full_Sentence:
         output = (self.new_sentence, self.timestamp)
         self.new_sentence = False
         return output
+
+    def get_current_sentence(self):
+        while True:
+            wait, sentence = self.get_full_sentence()
+            if not wait:
+                return sentence

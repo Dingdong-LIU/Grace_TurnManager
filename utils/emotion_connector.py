@@ -3,7 +3,9 @@ import rospy
 import grace_attn_msgs
 
 class FE_Connector:
-
+    """
+    This class is a ROS subscriber to the emotion recognition topic. It will store the emotion and attention data in a deque.
+    """
     def __init__(self, args) -> None:
         #rospy.init_node("emotion_recognition_node")
         self.emotion_sub = rospy.Subscriber(
@@ -47,3 +49,19 @@ class FE_Connector:
         else:
             attn = occurence_count.most_common(2)
             return attn[1][0]
+
+    def get_attention(self) -> deque[str]:
+        """Get the attention signal from emotion recognition subscriber
+
+        Returns:
+            deque[str]: A deque of attention signal. "True" or "False"
+        """
+        return self.attention
+
+    def get_emotion(self) -> deque[str]:
+        """Get the emotion signal from emotion recognition subscriber
+
+        Returns:
+            deque[str]: A deque of emotion signal. {'Anger', 'Contempt', 'Agitation' ('Disgust', 'Fear'), 'Happiness', 'Neutral', 'Sadness', 'Surprise', "Abscence"(no face), "EXCEPTION!!"(didn't track patient)}
+        """
+        return self.emotion

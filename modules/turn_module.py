@@ -1,0 +1,208 @@
+from collections import Counter
+from typing import Union, Optional
+import logging
+import time
+import threading
+from utils.asr_connector import ASR_Full_Sentence, ASR_Word_Stream
+from utils.emotion_connector import FE_Connector
+# import os
+# import sys
+
+
+# PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+# sys.path.append(PROJECT_ROOT)
+
+
+class ThreadWithReturnValue(threading.Thread):
+    """
+    A thread class that returns a value when join() is called
+
+    Args:
+        threading (_type_): _description_
+    """
+    def __init__(self, group=None, target=None, name=None,
+                 args=(), kwargs: Optional[dict]=None, Verbose=None):
+        if kwargs is None:
+            kwargs = {}
+        threading.Thread.__init__(self, group, target, name, args, kwargs)
+        self._return = None
+    def run(self):
+        if self._target is not None:
+            self._return = self._target(*self._args, **self._kwargs)
+    def join(self, *args):
+        threading.Thread.join(self, *args)
+        return self._return
+
+class Turn:
+    """
+    A turn is a combination of ASR input and emotion input.
+    """
+    def __init__(self, ownership=0, asr_input_thread=None, emotion_input=None, attention_input=None, exiting_asr = None, reconstruct = False, time_stamp=0):
+        # sensor data for extraction
+        self.asr_input = None
+        self.asr_input_thread = asr_input_thread
+        self.emotion_input = emotion_input
+        self.attention_input = attention_input
+        self.create_time = time_stamp
+
+        # redo construction flag
+        self.exiting_asr = exiting_asr
+        self.reconstruct_flag = reconstruct
+
+        # property data
+        # could be "not_owned", "robot_turn", "human_turn"
+        self.ownership = ownership
+
+    def get_attention(self) -> str:
+        """
+        This function will return the attention of the turn. The attention is the most frequent attention in the attention input.
+
+        Returns:
+            str: attention
+        """
+        attention = Counter(self.attention_input).most_common(1)[0][0]
+        return attention
+
+
+    def get_emotion(self) -> str:
+        """
+        This function will return the emotion of the turn. The emotion is the most frequent emotion in the emotion input.
+
+        Returns:
+            str: emotion
+        """
+        emotion = Counter(self.emotion_input).most_common(1)[0][0]
+        return emotion
+
+    def get_asr(self) -> str:
+        """
+        This function will return the ASR input of the turn.
+
+        Returns:
+            str: ASR input
+        """
+        asr = self.asr_input_thread.join()
+        if self.reconstruct_flag:
+            self.asr_input = self.exiting_asr + '\n' + asr
+        else:
+            self.asr_input = asr
+        return self.asr_input
+
+    def get_ownership(self):
+        """
+        This function will return the ownership of the turn.
+
+        Returns:
+            int: ownership
+        """
+        return self.ownership
+
+
+class TurnSegmenter:
+    """
+    This Segmenter segments sensor inputs into turns
+    """
+    def __init__(self, asr_listener: Union[ASR_Word_Stream, ASR_Full_Sentence], emotion_listener:FE_Connector):
+        # Class functions
+        # self.frequency = frequency
+        self.logger = logging.getLogger(__name__)
+
+        # Sensor inputs
+        self.asr_listener = asr_listener
+        self.emotion_listener = emotion_listener
+        self.VAD = None
+
+        # Robot high level action state - whether robot is doing meanful replies
+        self.in_action = False
+
+        # Last turn object, default to available
+        self.last_turn = None
+        self.last_human_turn = None
+
+        # Last turn ownership, for debug purpose
+        # could be "not_owned", "robot_turn", "human_turn"
+        self.last_turn_ownership = 0
+
+    def construct_turn(self, turn_ownership:str):
+        # TODO: solve the timing issue: if the turn is constructed too early, the asr input will be empty. How to choose between the asr sentence stream and the asr word stream?
+        """
+        This function will construct a turn object. It will return a turn object, and update the last turn reference. ASR and emotion input will be kept a sequence of words.
+
+        Returns:
+            _type_: _description_
+        """
+        asr_input_thread = self.get_asr_input()
+        emotion_input = self.emotion_listener.get_emotion()
+        attention_input = self.emotion_listener.get_attention()
+        turn = Turn(
+            ownership=turn_ownership, time_stamp=time.time(), asr_input_thread=asr_input_thread, emotion_input=emotion_input, attention_input=attention_input
+        )
+        self.last_turn = turn
+        if turn_ownership == "human_turn":
+            self.last_human_turn = turn
+        return turn
+
+    def get_asr_input(self) -> ThreadWithReturnValue:
+        """
+        This function will return a ThreadWithReturnValue object that will get the ASR input. The ThreadWithReturnValue will return the asr input got when the thread.join() is called.
+
+        Returns:
+            ThreadWithReturnValue: a thread object that will return the asr input when join() is called
+        """
+        if isinstance(self.asr_listener, ASR_Word_Stream):
+            # Get sentence from word stream
+            # This function will immediately return the asr input (from word stream), although the asr input can be empty
+            # asr = self.asr_listener.get_current_sentence()
+            asr_thread = ThreadWithReturnValue(target=self.asr_listener.get_current_sentence)
+        elif isinstance(self.asr_listener, ASR_Full_Sentence):
+            # Get sentence from full sentence stream
+            # asr = self.asr_listener.get_asr_full_sentence()
+            asr_thread = ThreadWithReturnValue(target=self.asr_listener.get_current_sentence)
+        asr_thread.start()
+        return asr_thread
+
+    def redo_turn(self, turn_ownership:str):
+        """
+        This function will redo the last human turn. It will merge the current and last human turn to create a new turn object
+        """
+        self.logger.info("Redoing human turn, concatenating the current and last turn")
+        # Get the asr input from the last turn
+        exiting_asr = self.last_human_turn.get_asr()
+
+        # Construct a new turn object
+        asr_input_thread = self.get_asr_input()
+        emotion_input = self.emotion_listener.get_emotion()
+        emotion_input.extend(self.last_human_turn.get_emotion())
+        attention_input = self.emotion_listener.get_attention()
+        attention_input.extend(self.last_human_turn.get_attention())
+        turn = Turn(
+            ownership=turn_ownership, time_stamp=time.time(), asr_input_thread=asr_input_thread, emotion_input=emotion_input, attention_input=attention_input, exiting_asr=exiting_asr, reconstruct=True
+        )
+        return turn
+
+    def update_turn_information(self, state_dict):
+        """
+        This function will update the turn information. It will accumulate sensor information if no turn transition happens, but construct new turn objects if turn transition happens.
+        """
+        # Debug if turn ownership consistancy is broken
+        if self.last_turn.get_ownership() != self.last_turn_ownership:
+            self.logger.error("Turn ownership consistancy broken")
+            self.last_turn_ownership = self.last_turn.get_ownership()
+        
+
+        # Extract current turn ownership from state_dict
+        turn_ownership_meta = state_dict["turn_ownership"]
+        current_turn_ownership = turn_ownership_meta.get("val", "unknown")
+        # Log an error if current turn ownership is unknown
+        if current_turn_ownership == "unknown":
+            self.logger.error("Current turn ownership is unknown")
+            return None
+
+
+        if current_turn_ownership == self.last_turn.get_ownership():
+            # Do nothing if turn ownership does not change
+            # Return None
+            return None
+        # Construct a new turn object if turn ownership changes
+        new_turn_object = self.construct_turn(turn_ownership=current_turn_ownership)
+        return new_turn_object
