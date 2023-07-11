@@ -121,6 +121,15 @@ class Turn:
         """
         return self.ownership
 
+    def get_timestamp(self):
+        """
+        This function will return the timestamp of the turn.
+
+        Returns:
+            int: timestamp of create_time
+        """
+        return self.create_time
+
 
 class TurnSegmenter:
     """
@@ -146,6 +155,9 @@ class TurnSegmenter:
         # Last turn ownership, for debug purpose
         # could be "not_owned", "robot_turn", "human_turn"
         self.last_turn_ownership = 0
+
+        # Timeout (seconds) for a new turn
+        self.timeout = 5
 
     def construct_turn(self, turn_ownership:str):
         # TODO: solve the timing issue: if the turn is constructed too early, the asr input will be empty. How to choose between the asr sentence stream and the asr word stream?
@@ -189,7 +201,7 @@ class TurnSegmenter:
         """
         This function will redo the last human turn. It will merge the current and last human turn to create a new turn object
         """
-        self.logger.info("Redoing human turn, concatenating the current and last turn")
+        self.logger.info("Redoing human turn, concatenating the current and last human turn")
         # Get the asr input from the last turn
         exiting_asr = self.last_human_turn.get_asr()
 
@@ -228,5 +240,11 @@ class TurnSegmenter:
             # Return None
             return None
         # Construct a new turn object if turn ownership changes
+
+        # Consider a mis-segmentation if the time span is too short and now it is a human's turn
+        if current_turn_ownership == "human_turn" and time.time() - self.last_turn.get_timestamp() < self.timeout:
+            # Mis-segmentation happens
+            # Redo the last human turn
+            new_turn_object = self.redo_turn(turn_ownership=current_turn_ownership)
         new_turn_object = self.construct_turn(turn_ownership=current_turn_ownership)
         return new_turn_object
