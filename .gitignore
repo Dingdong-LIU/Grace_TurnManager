@@ -1,6 +1,7 @@
 ### Gitignore for devcontainer in Vscode
 .devcontainer
 .vscode
+deprecated/
 
 ### Gitignore for python project
 # Byte-compiled / optimized / DLL files
