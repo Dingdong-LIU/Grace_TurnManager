@@ -38,7 +38,7 @@ def mainloop():
             # In human's turn do not look at progressive actions
             # In robot's turn always check the turn actions
                 # speech actions > bc actions
-            # Also check the "gracefully end" turn action
+            # Also check the "gracefully end" turn action; the end of conversation action when questionnaire finishes.
             # call a service request for action execution
     ## loop ends
     pass
