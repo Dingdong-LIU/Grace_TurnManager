@@ -138,15 +138,54 @@ class TurnManager:
 
     def __mergeExec(self, decisions):
         #Apply gaze from instantaneous part
-        self.__logger.info(decisions['inst_act']['gaze_action'])
+        gaze_action = decisions['inst_act']['gaze_action']
+        if(gaze_action != None):
+            self.__gaze_behav_exec.initiateBehaviorThread(self.__composeReq(gaze_action))
+            self.__logger.info('Gaze action: %s' % decisions['inst_act']['gaze_action'])
 
         #Check if there is speech action from the progressive part
         if('prog_act' in decisions):
             #If there is, apply the speech action from prog part
-            self.__logger.info(decisions['prog_act'])
+
+            #Yifan note: decode the dict output and implement action execution command
+            self.__logger.info("Speech: %s" % decisions['prog_act'])
+
         else:
-            #If there isn't, apply actions from the inst part, if any
-            self.__logger.info(decisions['inst_act']['bc_action'])
+            #If no action from the progressive side, apply actions from the inst part, if any
+            nodding_action = decisions['inst_act']['bc_action']['nodding']
+            if(nodding_action != None):
+                self.__nod_behav_exec.initiateBehaviorThread(self.__composeReq(nodding_action))
+                self.__logger.info('Nodding: %s' % nodding_action)
+
+            humming_action = decisions['inst_act']['bc_action']['hum']
+            if(humming_action != None):
+                self.__logger.info('Humming: %s' % humming_action)
+
+
+    def __composeReq(self, cmd, args = None):
+        req = grace_attn_msgs.srv.GraceBehaviorRequest()
+        
+        req.command = cmd
+
+        if(req.command == self.__config_data['BehavExec']['General']['comp_behav_exec_cmd']
+            or
+           req.command == self.__config_data['BehavExec']['General']['hum_behav_exec_cmd']):
+
+            req.utterance = args['utterance']
+            req.lang = args['lang']
+
+            req.expressions = args['expressions']
+            req.exp_start = args['exp_start']
+            req.exp_end = args['exp_end']
+            req.exp_mag = args['exp_mag']
+
+            req.gestures = args['gestures']
+            req.ges_start = args['ges_start']
+            req.ges_end = args['ges_end']
+            req.ges_mag = args['ges_mag']
+
+
+        return req
 
     def mainLoop(self):
         #Setup main loop
@@ -159,8 +198,10 @@ class TurnManager:
 
         #Enter tm main loop
         while True:
+
             it_cnt = it_cnt + 1
-            print('[Iteration %d]' % it_cnt)
+            self.__logger.info('[Iteration %.6d]' % it_cnt)
+
             if(it_cnt == 1):
                 #Special processing to initialize instantaneous state
                 #We initialize after dialogue initiation so that the timestamp in the state is more accurate
@@ -177,6 +218,7 @@ class TurnManager:
             self.__mergeExec(decisions)
 
             #Sleep by rate
+            self.__logger.info('******************\n')
             rate.sleep()
 
 
