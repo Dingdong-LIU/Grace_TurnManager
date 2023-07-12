@@ -123,19 +123,23 @@ class TurnManager:
                 emotion_listener=emotion_listener
             )
 
-    def __updateStates(self):
-        self.__state_monitor_inst.updateState()
+    def __initiateDialogue(self):
+        #For progressive part, initialize turn and trigger first action
 
-        #Progressive part is automatically updating
-        # self.__state_monitor_prog.updateState()
+        initial_action = self.__policy_progressive.initialize_conversation()
+        # Execute the "start conversation action"
+        # Yifan note: SHOULD STILL HAVE TURN-TAKING AND YIELDING ACTION!!
+        self.__logger.info(initial_action)
+        #self.__mergeExec(initial_action)
+
+
 
     def __applyPolicy(self):
         decisions = {}
 
         # Apply the instantaneous policy
         state = self.__state_monitor_inst.getState()
-        instantaneous_actions = self.__policy_instantaneous.applyPolicy(state)
-        decisions['inst_act'] = instantaneous_actions
+        decisions['inst_act'] = self.__policy_instantaneous.applyPolicy(state)
 
         if(self.__config_data['TM']['Debug']['enable_prog_part']):
             # Apply the progressive policy
@@ -160,38 +164,33 @@ class TurnManager:
             #If there isn't, apply actions from the inst part, if any
             self.__logger.info(decisions['inst_act']['bc_action'])
 
-
-
-
     def mainLoop(self):
-        
+        #Setup main loop
         rate = rospy.Rate(self.__config_data['TM']['General']['main_freq'])
         it_cnt = 0
+
+        #Initiate dialogue
+        if(self.__config_data['TM']['Debug']['enable_prog_part']):
+            self.__initiateDialogue()
+
+        #Enter tm main loop
         while True:
             it_cnt = it_cnt + 1
             print('[Iteration %d]' % it_cnt)
             if(it_cnt == 1):
-                #Initial state
-
-                #For instantaneous part, initial state is hardcoded, we just reset timestamp
+                #Special processing to initialize instantaneous state
+                #We initialize after dialogue initiation so that the timestamp in the state is more accurate
+                #Note that the instantaneous state monitor assumes that the dialogue starts in robot's turn
                 self.__state_monitor_inst.initializeState()
-
-                if(self.__config_data['TM']['Debug']['enable_prog_part']):
-                    # For progressive part, construct the first turn
-                    initial_action = self.__policy_progressive.initialize_conversation()
-                    # Execute the "start conversation action"
-                    self.__logger.info(initial_action)
-                    #self.__mergeExec(initial_action)
-
             else:
-                #Update states
-                self.__updateStates()
+                #Update instantaneous states
+                self.__state_monitor_inst.updateState()
 
-                #Apply policies
-                decisions = self.__applyPolicy()
+            #Apply policies
+            decisions = self.__applyPolicy()
 
-                #Merge and execute actions
-                self.__mergeExec(decisions)
+            #Merge and execute actions
+            self.__mergeExec(decisions)
 
             #Sleep by rate
             rate.sleep()
