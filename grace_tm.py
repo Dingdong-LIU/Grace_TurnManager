@@ -140,7 +140,7 @@ class TurnManager:
         #Apply gaze from instantaneous part
         gaze_action = decisions['inst_act']['gaze_action']
         if(gaze_action != None):
-            self.__gaze_behav_exec.initiateBehaviorThread(self.__composeReq(gaze_action))
+            self.__gaze_behav_exec.initiateBehaviorThread(self.__composeBehavReq(gaze_action))
             self.__logger.info('Gaze action: %s' % decisions['inst_act']['gaze_action'])
 
         #Check if there is speech action from the progressive part
@@ -151,18 +151,17 @@ class TurnManager:
             self.__logger.info("Speech: %s" % decisions['prog_act'])
 
         else:
-            #If no action from the progressive side, apply actions from the inst part, if any
+            #If no action from the progressive side, apply actions from the inst part (if any)
             nodding_action = decisions['inst_act']['bc_action']['nodding']
             if(nodding_action != None):
-                self.__nod_behav_exec.initiateBehaviorThread(self.__composeReq(nodding_action))
+                self.__nod_behav_exec.initiateBehaviorThread(self.__composeBehavReq(nodding_action))
                 self.__logger.info('Nodding: %s' % nodding_action)
 
             humming_action = decisions['inst_act']['bc_action']['hum']
             if(humming_action != None):
                 self.__logger.info('Humming: %s' % humming_action)
 
-
-    def __composeReq(self, cmd, args = None):
+    def __composeBehavReq(self, cmd, args = None):
         req = grace_attn_msgs.srv.GraceBehaviorRequest()
         
         req.command = cmd
