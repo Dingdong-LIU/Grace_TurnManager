@@ -13,7 +13,7 @@ logging.basicConfig(
 if not os.path.exists("logs"):
     os.mkdir("logs")
 timestr = time.strftime("%Y%m%d-%H%M%S")
-file_handler = logging.FileHandler(f"logs/third_stage_{timestr}.log")
+file_handler = logging.FileHandler(f"logs/fourth_stage_{timestr}.log")
 file_handler.setLevel(logging.DEBUG)
 
 # Create a console handler
@@ -32,7 +32,7 @@ root_logger = logging.getLogger()
 
 # Add the file handler to the root logger
 root_logger.addHandler(file_handler)
-root_logger.addHandler(console_handler)
+# root_logger.addHandler(console_handler)
 
 
 

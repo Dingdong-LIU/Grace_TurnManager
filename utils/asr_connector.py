@@ -16,6 +16,8 @@ class ASR_Word_Stream:
             key "ASR_word" refer to path of ASR_word_stream
         """
         #rospy.init_node("ASR_Word_Stream")
+
+        # TODO: change to interium stream
         self.word_listener = rospy.Subscriber(
             args.ros_topic["ASR_word"],
             hr_msgs.msg.ChatMessage,
@@ -39,6 +41,7 @@ class ASR_Word_Stream:
         return output
 
     def get_current_sentence(self):
+        #  TODO: Confirm if we need a mannual cache clean
         return self.word
 
 

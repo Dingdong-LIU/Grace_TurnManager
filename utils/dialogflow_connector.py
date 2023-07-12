@@ -4,17 +4,19 @@ import time
 import requests
 
 
-NGROK_LINK = 'https://grace-dialogue-module.ngrok.app'
+
 class DialogflowConnector:
     """
     Connect to the Dialogflow chatbot module 
     """
-    def __init__(self) -> None:
+    def __init__(self, link='https://grace-dialogue-module.ngrok.app') -> None:
+        self.NGROK_LINK = link
+        random.seed(time.time())
         self.session_id = random.randint(10000000, 500000000)
         self.logger = logging.getLogger(__name__)
 
         # TODO: Fill this magic string
-        self.revert_magic_string = ""
+        self.revert_magic_string = "revert previous intnt due to barge in"
         self.start_conversation_magic_string = "This is a magic phrase to initialize grace agent to welcome intent."
         self.gracefully_end_magic_string = "gracefully exit the interaction."
         self.repeat_magic_string = "please repeat"
@@ -24,7 +26,7 @@ class DialogflowConnector:
         print(self.session_id)
 
     def communicate(self, asr_text):
-        self.logger.info("Start to communicate with chatbot: %s" ,asr_text, exe_info=True)
+        self.logger.info("Start to communicate with chatbot: %s" ,asr_text)
         empty_response = {
             "responses" : {
                 "intent" : "",
@@ -33,7 +35,7 @@ class DialogflowConnector:
             }
         try:
             response = requests.post(
-                f"{NGROK_LINK}/dialogflow_result",
+                f"{self.NGROK_LINK}/dialogflow_result",
                 json={
                     "text": asr_text,
                     "session_id": self.session_id
@@ -50,12 +52,12 @@ class DialogflowConnector:
         except requests.exceptions.RequestException as err:
             self.logger.error(
                 "Error in communicating with dialogueflow. Return empty response. url=%s, json=%s", 
-                f"{NGROK_LINK}/dialogflow_result", 
+                f"{self.NGROK_LINK}/dialogflow_result", 
                 str({
                     "text": asr_text,
                     "session_id": self.session_id
-                },
-                err, exc_info=True)
+                }),
+                err, exc_info=True
             )
             return empty_response
 
@@ -68,7 +70,7 @@ class DialogflowConnector:
         Returns:
             dict: reponse.json()
         """
-        self.logger.debug("(Fake response) Start to communicate with chatbot: %s" ,asr_text, exe_info=True)
+        self.logger.debug("(Fake response) Start to communicate with chatbot: %s" ,asr_text)
         time.sleep(1.5) # sleep to fake the latency
         response = {
             "responses" : {
