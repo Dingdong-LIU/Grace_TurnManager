@@ -1,5 +1,8 @@
 import grace_attn_msgs.msg
 import grace_attn_msgs.srv
+import std_msgs
+import rospy
+
 import logging
 from utils.database_reader import database_reader
 
@@ -13,6 +16,8 @@ class ActionComposer:
         self.req = None
         self.lang = 'yue-Hant-HK'
         self.logger = logging.getLogger(__name__)
+
+        self.turn_action_publisher = rospy.Publisher("/grace_proj/turn_action", data_class=std_msgs.msg.String, queue_size=100)
 
     def parse_reply_from_chatbot(self, res:dict):
         intent = res["responses"]['intent']
@@ -44,3 +49,9 @@ class ActionComposer:
         self.req.command = command
         self.req.lang = self.lang
         return self.req
+    
+    def publish_turn_taking_action(self):
+        self.turn_action_publisher.publish("robot_take_turn")
+
+    def publish_turn_yielding_action(self):
+        self.turn_action_publisher.publish("robot_yield_turn")

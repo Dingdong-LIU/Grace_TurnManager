@@ -1,3 +1,4 @@
+import time
 import grace_attn_msgs.msg
 import grace_attn_msgs.srv
 from utils.dialogflow_connector import DialogflowConnector
@@ -24,6 +25,9 @@ class ProgressivePolicy:
         self.action_composer = ActionComposer()
     
     def process_human_turn(self, turn:Turn) -> grace_attn_msgs.srv.GraceBehaviorRequest:
+        # indicate robot wants to take turn
+        self.action_composer.publish_turn_taking_action()
+
         # get the engagement level
         engagement_level = turn.get_engagement_level()
         # Gracefully end the conversation if the engagement level is "agitated"
@@ -51,6 +55,12 @@ class ProgressivePolicy:
 
 
     def applyPolicy(self, state_dict):
+        # Yield the robot's turn if robot finish talking
+        robot_speaking = state_dict['robot_speaking']
+        if robot_speaking == "not_speaking":
+            # Yield robot's turn
+            self.action_composer.publish_turn_yielding_action()
+            pass
         turn = self.turn_segmenter.update_turn_information(state_dict)
         # if turn object is none, then there is no turn need to be processed, return empty actions
         if turn is None:
@@ -74,8 +84,19 @@ class ProgressivePolicy:
             else:
                 # process a reconstructed human turn
                 # First send a revert request to the chatbot
-                self.revert_task = ThreadWithReturnValue(target=self.chatbot.revert_last_turn())
+                self.revert_task = ThreadWithReturnValue(target=self.chatbot.revert_last_turn)
                 # Then start a thread to process human turn
                 self.processing_task = ThreadWithReturnValue(target=self.process_human_turn, args=(turn,))
         else:
             return None
+    
+    def initialize_conversation(self):
+        # Construct an initial turn object
+        initial_turn = Turn(ownership="robot_turn", time_stamp=time.time())
+        self.turn_segmenter.last_turn = initial_turn
+
+        # Ask the robot to start conversation
+        res = self.chatbot.start_conversation()
+        utterance, params = self.action_composer.parse_reply_from_chatbot(res)
+        req = self.action_composer.compose_req(command="exec", utterance=utterance, params=params)
+        return req

@@ -1,0 +1,7 @@
+Ros:  
+  node_name: "turn_manager"
+  grace_behavior_service: "/grace_proj/execute_behavior_command"
+
+
+General:
+  main_freq: 20

@@ -4,7 +4,7 @@ from utils.action_composer import ActionComposer
 
 
 if __name__ == "__main__":
-    chatbot = DialogflowConnector(link="https://869a-143-89-145-170.ngrok-free.app")
+    chatbot = DialogflowConnector(link="https://1cc3-143-89-145-170.ngrok-free.app")
     action_composer = ActionComposer()
 
     # start the conversation

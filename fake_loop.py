@@ -11,7 +11,7 @@ def mainloop():
     # 2.1 state module1: instantainous state monitor (one line)
     # 2.2 state module2: initialize turn manager module 
     # 2.3 policy module1: instanious policy
-    # 2.4 policy module2: engagement and decorators of robot response
+    # 2.4 policy module2 (already covered done in 2.3): engagement and decorators of robot response
     ## 2.4.1 definition of turn talking action & topics [definitions are in Grace_Pace_Monitor/config/config.yaml/line23]
 
     ## instantiate action execution channel:

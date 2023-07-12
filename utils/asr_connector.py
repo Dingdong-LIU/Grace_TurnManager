@@ -19,7 +19,7 @@ class ASR_Word_Stream:
 
         # TODO: change to interium stream
         self.word_listener = rospy.Subscriber(
-            args.ros_topic["ASR_word"],
+            args["Ros"]["asr_words_topic"],
             hr_msgs.msg.ChatMessage,
             self.callback,
             queue_size=100
@@ -35,7 +35,7 @@ class ASR_Word_Stream:
         self.new_word = True
         self.logger.info("ASR_WORD_STREAM: %s", self.word)
 
-    def get_time_stamp(self) -> tuple[bool, int, float]:
+    def get_time_stamp(self) :
         output = (self.new_word, self.timestamp)
         self.new_word = False
         return output

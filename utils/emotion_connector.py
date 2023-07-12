@@ -9,7 +9,7 @@ class FE_Connector:
     def __init__(self, args) -> None:
         #rospy.init_node("emotion_recognition_node")
         self.emotion_sub = rospy.Subscriber(
-            args.ros_topic["emotion_topic"],
+            args["Ros"]["topic_emotion_attention_state_estimation"],
             grace_attn_msgs.msg.EmotionAttentionResult,
             callback=self.callback,
             queue_size=100
@@ -50,7 +50,7 @@ class FE_Connector:
             attn = occurence_count.most_common(2)
             return attn[1][0]
 
-    def get_attention(self) -> deque[str]:
+    def get_attention(self):
         """Get the attention signal from emotion recognition subscriber
 
         Returns:
@@ -58,7 +58,7 @@ class FE_Connector:
         """
         return self.attention
 
-    def get_emotion(self) -> deque[str]:
+    def get_emotion(self):
         """Get the emotion signal from emotion recognition subscriber
 
         Returns:

@@ -9,7 +9,7 @@ class DialogflowConnector:
     """
     Connect to the Dialogflow chatbot module 
     """
-    def __init__(self, link='https://grace-dialogue-module.ngrok.app') -> None:
+    def __init__(self, link='https://1cc3-143-89-145-170.ngrok-free.app') -> None:
         self.NGROK_LINK = link
         random.seed(time.time())
         self.session_id = random.randint(10000000, 500000000)
