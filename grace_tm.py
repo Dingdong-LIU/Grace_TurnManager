@@ -83,10 +83,19 @@ class TurnManager:
         # self.__grace_behav_client = rospy.ServiceProxy(
         #                                 self.__config_data['Custom']['Behavior']['grace_behavior_service'], 
         #                                 grace_attn_msgs.srv.GraceBehavior)
-        self.__gaze_behav_exec = Grace_Behav_Executor.grace_behav_exec.BehavExec(self.__config_data, False)
-        self.__nod_behav_exec = Grace_Behav_Executor.grace_behav_exec.BehavExec(self.__config_data, False)
-        self.__speak_behav_exec = Grace_Behav_Executor.grace_behav_exec.BehavExec(self.__config_data, False)
-        self.__hum_behav_exec = Grace_Behav_Executor.grace_behav_exec.BehavExec(self.__config_data, False)
+        #Yifan note: use the right instance for the right functionality
+        self.__gaze_behav_exec = Grace_Behav_Executor.grace_behav_exec.BehavExec(
+                                        self.__config_data, False,
+                                        Grace_Behav_Executor.grace_behav_exec.ExecFnc.GAZE)
+        self.__nod_behav_exec = Grace_Behav_Executor.grace_behav_exec.BehavExec(
+                                        self.__config_data, False,
+                                        Grace_Behav_Executor.grace_behav_exec.ExecFnc.NOD)
+        self.__speak_behav_exec = Grace_Behav_Executor.grace_behav_exec.BehavExec(
+                                        self.__config_data, False, 
+                                        Grace_Behav_Executor.grace_behav_exec.ExecFnc.SPEECH)
+        self.__hum_behav_exec = Grace_Behav_Executor.grace_behav_exec.BehavExec(
+                                        self.__config_data, False, 
+                                        Grace_Behav_Executor.grace_behav_exec.ExecFnc.HUM)
 
 
         #Instantiate critical components of instantaneous parts
@@ -117,6 +126,8 @@ class TurnManager:
         # Yifan note: SHOULD STILL HAVE TURN-TAKING AND YIELDING ACTION!!
         self.__logger.info(initial_action)
         #self.__mergeExec(initial_action)
+
+
 
     def __applyPolicy(self):
         decisions = {}
