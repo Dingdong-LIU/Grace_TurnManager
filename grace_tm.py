@@ -26,27 +26,6 @@ import hr_msgs.srv
 import std_msgs
 
 
-#Create Logger
-def setupLogger(file_log_level, terminal_log_level, logger_name, log_file_name):
-    log_formatter = logging.Formatter('%(asctime)s %(msecs)03d %(name)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s', 
-                                  datefmt='%d/%m/%Y %H:%M:%S')
-
-    f = open(log_file_name, "a")
-    f.close()
-    file_handler = logging.FileHandler(log_file_name)
-    file_handler.setFormatter(log_formatter)
-    file_handler.setLevel(file_log_level)
-
-    stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(log_formatter)
-    stream_handler.setLevel(terminal_log_level)
-
-    logger = logging.getLogger(logger_name)
-    logger.addHandler(file_handler)
-    logger.addHandler(stream_handler)
-    logger.setLevel( min(file_log_level,terminal_log_level) )#set to lowest
-
-    return logger
 
 #Respond to exit signal
 def handle_sigint(signalnum, frame):
@@ -60,7 +39,9 @@ file_path = os.path.dirname(os.path.realpath(getsourcefile(lambda:0)))
 sys.path.append(os.path.join(file_path, '..'))
 import Grace_Pace_Monitor.grace_instantaneous_state_monitor
 import Grace_Instantaneous_Policy.grace_instantaneous_policy
-
+import Grace_Behav_Executor.grace_behav_exec
+from CommonConfigs.grace_cfg_loader import loadGraceConfigs
+from CommonConfigs.logging import setupLogger
 
 # Load necessary modules from progressive part
 # Load the logging configuration
@@ -87,6 +68,9 @@ class TurnManager:
         
         self.__config_data = config_data
 
+        rospy.init_node(self.__config_data['TM']['Ros']['node_name'])
+        self.__nh = True
+
         # # Load sensor config
         # sensor_config_path = os.path.join(
         #     os.path.dirname(os.path.realpath(getsourcefile(lambda:0))), 
@@ -94,18 +78,20 @@ class TurnManager:
         # )
         # self.__sensor_config_data = loadConfig(sensor_config_path)
 
-        #Ros related components for calling the behavior executor
-        self.__nh = True
-        rospy.init_node(self.__config_data['TM']['Ros']['node_name'])
-        self.__grace_behav_client = rospy.ServiceProxy(
-                                        self.__config_data['Custom']['Behavior']['grace_behavior_service'], 
-                                        grace_attn_msgs.srv.GraceBehavior)
+        #Behavior execution
 
+        # self.__grace_behav_client = rospy.ServiceProxy(
+        #                                 self.__config_data['Custom']['Behavior']['grace_behavior_service'], 
+        #                                 grace_attn_msgs.srv.GraceBehavior)
+        self.__gaze_behav_exec = Grace_Behav_Executor.grace_behav_exec.BehavExec(self.__config_data, False)
+        self.__nod_behav_exec = Grace_Behav_Executor.grace_behav_exec.BehavExec(self.__config_data, False)
+        self.__speak_behav_exec = Grace_Behav_Executor.grace_behav_exec.BehavExec(self.__config_data, False)
+        self.__hum_behav_exec = Grace_Behav_Executor.grace_behav_exec.BehavExec(self.__config_data, False)
 
 
         #Instantiate critical components of instantaneous parts
-        self.__state_monitor_inst = Grace_Pace_Monitor.grace_instantaneous_state_monitor.InstantaneousStateMonitor(self.__config_data, self.__nh)
-        self.__policy_instantaneous = Grace_Instantaneous_Policy.grace_instantaneous_policy.InstantaneousPolicy(self.__config_data)
+        self.__state_monitor_inst = Grace_Pace_Monitor.grace_instantaneous_state_monitor.InstantaneousStateMonitor(self.__config_data, self.__logger, self.__nh)
+        self.__policy_instantaneous = Grace_Instantaneous_Policy.grace_instantaneous_policy.InstantaneousPolicy(self.__config_data, self.__logger)
         
 
         if(self.__config_data['TM']['Debug']['enable_prog_part']):
@@ -131,8 +117,6 @@ class TurnManager:
         # Yifan note: SHOULD STILL HAVE TURN-TAKING AND YIELDING ACTION!!
         self.__logger.info(initial_action)
         #self.__mergeExec(initial_action)
-
-
 
     def __applyPolicy(self):
         decisions = {}
@@ -198,11 +182,6 @@ class TurnManager:
 
 
 if __name__ == '__main__':
-    file_path = os.path.dirname(os.path.realpath(getsourcefile(lambda:0)))
-    sys.path.append(os.path.join(file_path, '..'))
-    from CommonConfigs.grace_cfg_loader import *
     grace_config = loadGraceConfigs()
-
-
     grace_tm = TurnManager(grace_config)
     grace_tm.mainLoop()
