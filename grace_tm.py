@@ -26,14 +26,6 @@ import hr_msgs.srv
 import std_msgs
 
 
-#Load configs
-def loadConfig(path):
-    #Load configs
-    with open(path, "r") as config_file:
-        config_data = yaml.load(config_file, Loader=yaml.FullLoader)
-        # print("Config file loaded")
-    return config_data
-
 #Create Logger
 def setupLogger(file_log_level, terminal_log_level, logger_name, log_file_name):
     log_formatter = logging.Formatter('%(asctime)s %(msecs)03d %(name)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s', 
@@ -84,7 +76,7 @@ from modules.progressive_policy import ProgressivePolicy
 
 class TurnManager:
 
-    def __init__(self):
+    def __init__(self, config_data):
         #Miscellaneous
         signal(SIGINT, handle_sigint)
         self.__logger = setupLogger(
@@ -93,44 +85,43 @@ class TurnManager:
                     self.__class__.__name__,
                     "./logs/log_" + datetime.now().strftime("%a_%d_%b_%Y_%I_%M_%S_%p"))
         
-        config_path = os.path.dirname(os.path.realpath(getsourcefile(lambda:0))) + "/config/config.yaml"
-        self.__config_data = loadConfig(config_path)
-        # Load sensor config
-        sensor_config_path = os.path.join(
-            os.path.dirname(os.path.realpath(getsourcefile(lambda:0))), 
-            "..", 'Grace_Sensor_Interface/config/config.yaml'
-        )
-        
-        self.__sensor_config_data = loadConfig(sensor_config_path)
+        self.__config_data = config_data
+
+        # # Load sensor config
+        # sensor_config_path = os.path.join(
+        #     os.path.dirname(os.path.realpath(getsourcefile(lambda:0))), 
+        #     "..", 'Grace_Sensor_Interface/config/config.yaml'
+        # )
+        # self.__sensor_config_data = loadConfig(sensor_config_path)
 
         #Ros related components for calling the behavior executor
         self.__nh = True
-        rospy.init_node(self.__config_data['Ros']['node_name'])
+        rospy.init_node(self.__config_data['TM']['Ros']['node_name'])
         self.__grace_behav_client = rospy.ServiceProxy(
-                                        self.__config_data['Ros']['grace_behavior_service'], 
+                                        self.__config_data['Custom']['Behavior']['grace_behavior_service'], 
                                         grace_attn_msgs.srv.GraceBehavior)
 
 
 
         #Instantiate critical components of instantaneous parts
-        self.__state_monitor_inst = Grace_Pace_Monitor.grace_instantaneous_state_monitor.InstantaneousStateMonitor(self.__nh)
-        self.__policy_instantaneous = Grace_Instantaneous_Policy.grace_instantaneous_policy.InstantaneousPolicy()
+        self.__state_monitor_inst = Grace_Pace_Monitor.grace_instantaneous_state_monitor.InstantaneousStateMonitor(self.__config_data, self.__nh)
+        self.__policy_instantaneous = Grace_Instantaneous_Policy.grace_instantaneous_policy.InstantaneousPolicy(self.__config_data)
         
 
-        #Instantiate critical components of progressive parts
-        # self.__state_monitor_prog = None
-        # self.__policy_turn = None
+        if(self.__config_data['TM']['Debug']['enable_prog_part']):
+            #Instantiate critical components of progressive parts
+            # self.__state_monitor_prog = None
+            # self.__policy_turn = None
 
-        # Start the ASR service
-        asr_listener = ASR_Word_Stream(self.__sensor_config_data)
-        # Start the vision module
-        emotion_listener = FE_Connector(self.__sensor_config_data)
-        # Start the policy
-        self.__policy_progressive = ProgressivePolicy(
-            asr_listener=asr_listener,
-            emotion_listener=emotion_listener
-        )
-
+            # Start the ASR service
+            asr_listener = ASR_Word_Stream(self.__sensor_config_data)
+            # Start the vision module
+            emotion_listener = FE_Connector(self.__sensor_config_data)
+            # Start the policy
+            self.__policy_progressive = ProgressivePolicy(
+                asr_listener=asr_listener,
+                emotion_listener=emotion_listener
+            )
 
     def __updateStates(self):
         self.__state_monitor_inst.updateState()
@@ -138,21 +129,21 @@ class TurnManager:
         #Progressive part is automatically updating
         # self.__state_monitor_prog.updateState()
 
-
     def __applyPolicy(self):
         decisions = {}
 
-        # Get sensor state
+        # Apply the instantaneous policy
         state = self.__state_monitor_inst.getState()
         instantaneous_actions = self.__policy_instantaneous.applyPolicy(state)
         decisions['inst_act'] = instantaneous_actions
 
-        # Apply the progressive policy
-        progressive_actions = self.__policy_progressive.applyPolicy(
-            state
-        )
-        if(progressive_actions != None):
-            decisions['prog_act'] = progressive_actions
+        if(self.__config_data['TM']['Debug']['enable_prog_part']):
+            # Apply the progressive policy
+            progressive_actions = self.__policy_progressive.applyPolicy(
+                state
+            )
+            if(progressive_actions != None):
+                decisions['prog_act'] = progressive_actions
 
 
         return decisions
@@ -173,13 +164,8 @@ class TurnManager:
 
 
     def mainLoop(self):
-        '''
-        Question:
-            Format of template actions (bc)?
-            Format of the output action definitions?
-            Fusing output action"
-        '''
-        rate = rospy.Rate(self.__config_data['General']['main_freq'])
+        
+        rate = rospy.Rate(self.__config_data['TM']['General']['main_freq'])
         it_cnt = 0
         while True:
             it_cnt = it_cnt + 1
@@ -190,11 +176,12 @@ class TurnManager:
                 #For instantaneous part, initial state is hardcoded, we just reset timestamp
                 self.__state_monitor_inst.initializeState()
 
-                # For progressive part, construct the first turn
-                initial_action = self.__policy_progressive.initialize_conversation()
-                # Execute the "start conversation action"
-                self.__logger.info(initial_action)
-                #self.__mergeExec(initial_action)
+                if(self.__config_data['TM']['Debug']['enable_prog_part']):
+                    # For progressive part, construct the first turn
+                    initial_action = self.__policy_progressive.initialize_conversation()
+                    # Execute the "start conversation action"
+                    self.__logger.info(initial_action)
+                    #self.__mergeExec(initial_action)
 
             else:
                 #Update states
@@ -212,5 +199,11 @@ class TurnManager:
 
 
 if __name__ == '__main__':
-    grace_tm = TurnManager()
+    file_path = os.path.dirname(os.path.realpath(getsourcefile(lambda:0)))
+    sys.path.append(os.path.join(file_path, '..'))
+    from CommonConfigs.grace_cfg_loader import *
+    grace_config = loadGraceConfigs()
+
+
+    grace_tm = TurnManager(grace_config)
     grace_tm.mainLoop()
