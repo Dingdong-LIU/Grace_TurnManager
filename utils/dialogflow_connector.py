@@ -15,7 +15,6 @@ class DialogflowConnector:
         self.session_id = random.randint(10000000, 500000000)
         self.logger = logging.getLogger(__name__)
 
-        # TODO: Fill this magic string
         self.revert_magic_string = "revert previous intnt due to barge in"
         self.start_conversation_magic_string = "This is a magic phrase to initialize grace agent to welcome intent."
         self.gracefully_end_magic_string = "gracefully exit the interaction."
@@ -51,13 +50,14 @@ class DialogflowConnector:
             return empty_response
         except requests.exceptions.RequestException as err:
             self.logger.error(
+                err, 
                 "Error in communicating with dialogueflow. Return empty response. url=%s, json=%s", 
                 f"{self.NGROK_LINK}/dialogflow_result", 
                 str({
                     "text": asr_text,
                     "session_id": self.session_id
                 }),
-                err, exc_info=True
+                exc_info=True
             )
             return empty_response
 
