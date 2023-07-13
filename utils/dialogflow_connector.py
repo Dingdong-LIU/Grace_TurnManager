@@ -20,11 +20,19 @@ class DialogflowConnector:
         self.gracefully_end_magic_string = "gracefully exit the interaction."
         self.repeat_magic_string = "please repeat"
 
+        self.communicate = self.real_communicate
+
+    def debug_mode(self, enabled=False):
+        if enabled:
+            self.communicate = self.fake_response
+        else:
+            self.communicate = self.real_communicate
+        return
 
     def test(self):
         print(self.session_id)
 
-    def communicate(self, asr_text):
+    def real_communicate(self, asr_text):
         self.logger.info("Start to communicate with chatbot: %s" ,asr_text)
         empty_response = {
             "responses" : {
@@ -61,17 +69,18 @@ class DialogflowConnector:
             )
             return empty_response
 
-    def fake_response(self, asr_text) -> dict:
-        """Generate fake reponse to assist debugging. It will have a 1.5s timeout to simulate the communication latency.
+    def fake_response(self, asr_text, fake_latency=1.2) -> dict:
+        """Generate fake reponse to assist debugging. It will have a fake latency to simulate the communication latency.
 
         Args:
             asr_text (str): Received sentence to be submitted to the Dialogflow Chatbot
+            fake_latency (float, optional): Fake latency to simulate the communication latency. Defaults to 1.2 seconds.
 
         Returns:
             dict: reponse.json()
         """
         self.logger.debug("(Fake response) Start to communicate with chatbot: %s" ,asr_text)
-        time.sleep(1.5) # sleep to fake the latency
+        time.sleep(fake_latency) # sleep to fake the latency
         response = {
             "responses" : {
                 "intent" : "(Q0.Success) How are you - Bad",
