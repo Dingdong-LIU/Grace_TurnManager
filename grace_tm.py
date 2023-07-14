@@ -117,6 +117,9 @@ class TurnManager:
                 asr_listener=asr_listener,
                 emotion_listener=emotion_listener
             )
+            # Set the fake chatbot
+            if self.__config_data["TM"]["Debug"]["fake_chatbot"]:
+                self.__policy_progressive.set_fake_chatbot()
 
     def __initiateDialogue(self):
         #For progressive part, initialize turn and trigger first action

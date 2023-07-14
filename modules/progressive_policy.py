@@ -24,6 +24,9 @@ class ProgressivePolicy:
 
         self.action_composer = ActionComposer()
     
+    def set_fake_chatbot(self, use_fake_chatbot):
+        self.chatbot.debug_mode(enabled=use_fake_chatbot)
+    
     def process_human_turn(self, turn:Turn) -> grace_attn_msgs.srv.GraceBehaviorRequest:
         # indicate robot wants to take turn
         self.action_composer.publish_turn_taking_action()
