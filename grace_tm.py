@@ -118,7 +118,7 @@ class TurnManager:
                 emotion_listener=emotion_listener
             )
             # Set the fake chatbot
-            if self.__config_data["TM"]["Debug"]["fake_chatbot"]:
+            if self.__config_data["TM"]["Debug"].get("fake_chatbot", False):
                 self.__policy_progressive.set_fake_chatbot()
 
     def __initiateDialogue(self):
