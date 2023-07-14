@@ -11,13 +11,16 @@ class ActionComposer:
     """
     This class is used to compose a action request for Grace Robot
     """
-    def __init__(self):
-        self.database_reader = database_reader(filename="data/intent_emotion_mapping.xlsx")
+    def __init__(
+            self, database_file:str = "data/intent_emotion_mapping.xlsx", 
+            action_publisher_path:str = "/grace_proj/turn_action"
+        ):
+        self.database_reader = database_reader(filename=database_file)
         self.req = None
         self.lang = 'yue-Hant-HK'
         self.logger = logging.getLogger(__name__)
 
-        self.turn_action_publisher = rospy.Publisher("/grace_proj/turn_action", data_class=std_msgs.msg.String, queue_size=100)
+        self.turn_action_publisher = rospy.Publisher(action_publisher_path, data_class=std_msgs.msg.String, queue_size=100)
 
     def parse_reply_from_chatbot(self, res:dict):
         intent = res["responses"]['intent']

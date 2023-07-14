@@ -11,7 +11,7 @@ class ProgressivePolicy:
     """
     This class is the progressive policy module of the Grace Pace Monitor.
     """
-    def __init__(self, asr_listener, emotion_listener):
+    def __init__(self, asr_listener, emotion_listener, config:dict):
         self.chatbot = DialogflowConnector()
 
         self.turn_segmenter = TurnSegmenter(
@@ -22,7 +22,10 @@ class ProgressivePolicy:
         self.processing_task = None
         self.revert_task = None # only for debugging purpose
 
-        self.action_composer = ActionComposer()
+        self.action_composer = ActionComposer(
+            database_file=config["TM"]["Database"]["path"],
+            action_publisher_path=config["Custom"]["TM"]["turn_action_topic"]
+        )
     
     def set_fake_chatbot(self, use_fake_chatbot):
         self.chatbot.debug_mode(enabled=use_fake_chatbot)
