@@ -1,8 +1,9 @@
+import time
+import logging
 import rospy
 import dynamic_reconfigure.client
 import hr_msgs
-import time
-import logging
+
 
 class ASR_Word_Stream:
     """This class listens to ASR word stream.
@@ -19,7 +20,7 @@ class ASR_Word_Stream:
 
         # TODO: change to interium stream
         self.word_listener = rospy.Subscriber(
-            args["Ros"]["asr_words_topic"],
+            args["ASRVAD"]["asr_words_topic"],
             hr_msgs.msg.ChatMessage,
             self.callback,
             queue_size=100
@@ -46,21 +47,24 @@ class ASR_Word_Stream:
 
 
 class ASR_Sentence_Stream:
+    """
+    This class is deprecated and left unimplemented. Use ASR_Interim_Sentence instead.
+    """    
     def __init__(self) -> None:
         pass
 
 
 
-class ASR_Full_Sentence:
+class ASR_Interim_Sentence:
+    """
+    This class listens to ASR interim sentence.
+    """    
     def __init__(self, args) -> None:
-
-        # This is the configuration of ASR. I comment this out as Yifan told me he will handle it on his side. If there's misunderstanding, please uncomment this line.
-        # self.asr_language_config = self.ros_dynamic_configuration(lang="HK")
 
         # Subscriber listening to ROS topic
         #rospy.init_node("ASR_Full_Sentence_Node")
         self.full_sentence_listener = rospy.Subscriber(
-            args.ros_topic['ASR_full_sentence'],
+            args["ASRVAD"]["asr_interim_speech_topic"],
             hr_msgs.msg.ChatMessage,
             self.ASR_sentence_callback,
             queue_size=100

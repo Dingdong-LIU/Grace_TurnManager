@@ -3,6 +3,9 @@
 .vscode
 deprecated/
 
+### Test & debug files
+test
+
 ### Gitignore for python project
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -9,7 +9,7 @@ class FE_Connector:
     def __init__(self, args) -> None:
         #rospy.init_node("emotion_recognition_node")
         self.emotion_sub = rospy.Subscriber(
-            args["Ros"]["topic_emotion_attention_state_estimation"],
+            args["Perception"]["topic_emotion_attention_state_estimation"],
             grace_attn_msgs.msg.EmotionAttentionResult,
             callback=self.callback,
             queue_size=100

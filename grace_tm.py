@@ -47,7 +47,7 @@ from CommonConfigs.logging import setupLogger
 # Load the logging configuration
 import utils.logging_config
 # import the ASR, Visual Class
-from utils.asr_connector import ASR_Word_Stream, ASR_Full_Sentence
+from utils.asr_connector import ASR_Word_Stream, ASR_Interim_Sentence
 from utils.emotion_connector import FE_Connector
 # import progressive policy module
 from modules.progressive_policy import ProgressivePolicy
@@ -109,9 +109,9 @@ class TurnManager:
             # self.__policy_turn = None
 
             # Start the ASR service
-            asr_listener = ASR_Word_Stream(self.__sensor_config_data)
+            asr_listener = ASR_Word_Stream(self.__config_data["HR"])
             # Start the vision module
-            emotion_listener = FE_Connector(self.__sensor_config_data)
+            emotion_listener = FE_Connector(self.__config_data["Custom"])
             # Start the policy
             self.__policy_progressive = ProgressivePolicy(
                 asr_listener=asr_listener,

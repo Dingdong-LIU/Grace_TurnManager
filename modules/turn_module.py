@@ -3,7 +3,7 @@ from typing import Union, Optional, Literal
 import logging
 import time
 import threading
-from utils.asr_connector import ASR_Full_Sentence, ASR_Word_Stream
+from utils.asr_connector import ASR_Interim_Sentence, ASR_Word_Stream
 from utils.emotion_connector import FE_Connector
 # import os
 # import sys
@@ -135,7 +135,7 @@ class TurnSegmenter:
     """
     This Segmenter segments sensor inputs into turns
     """
-    def __init__(self, asr_listener: Union[ASR_Word_Stream, ASR_Full_Sentence], emotion_listener:FE_Connector):
+    def __init__(self, asr_listener: Union[ASR_Word_Stream, ASR_Interim_Sentence], emotion_listener:FE_Connector):
         # Class functions
         # self.frequency = frequency
         self.logger = logging.getLogger(__name__)
@@ -190,7 +190,7 @@ class TurnSegmenter:
             # This function will immediately return the asr input (from word stream), although the asr input can be empty
             # asr = self.asr_listener.get_current_sentence()
             asr_thread = ThreadWithReturnValue(target=self.asr_listener.get_current_sentence)
-        elif isinstance(self.asr_listener, ASR_Full_Sentence):
+        elif isinstance(self.asr_listener, ASR_Interim_Sentence):
             # Get sentence from full sentence stream
             # asr = self.asr_listener.get_asr_full_sentence()
             asr_thread = ThreadWithReturnValue(target=self.asr_listener.get_current_sentence)
