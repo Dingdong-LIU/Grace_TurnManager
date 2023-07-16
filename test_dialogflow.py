@@ -1,11 +1,26 @@
+import logging
+import os
+import datetime
+
 from utils.dialogflow_connector import DialogflowConnector
 from utils import logging_config
 from utils.action_composer import ActionComposer
 
+import sys
+sys.path.append("..")
+
+from CommonConfigs.grace_cfg_loader import loadGraceConfigs
+from CommonConfigs.logging import setupLogger
 
 if __name__ == "__main__":
+    l = setupLogger(logging.DEBUG, 
+                    logging.INFO, 
+                    __name__,
+                    os.path.join("./logs/log_") + datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S"))
+    l.info("Start test_dialogflow.py")
     chatbot = DialogflowConnector(link="https://1cc3-143-89-145-170.ngrok-free.app")
-    action_composer = ActionComposer()
+    chatbot.debug_mode(enabled=True)
+    action_composer = ActionComposer(config=loadGraceConfigs())
 
     # start the conversation
     res = chatbot.start_conversation()
@@ -21,6 +36,8 @@ if __name__ == "__main__":
             res = chatbot.repeat()
         elif sentence == "revert":
             res = chatbot.revert_last_turn()
+        elif sentence == "exit":
+            break
         else:
             res = chatbot.communicate(sentence)
         utterance, params = action_composer.parse_reply_from_chatbot(res)
