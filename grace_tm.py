@@ -65,7 +65,7 @@ class TurnManager:
         self.__config_data = config_data
 
         self.__logger = setupLogger(
-                    logging.DEBUG, 
+                    logging.INFO, 
                     logging.INFO, 
                     self.__class__.__name__,
                     os.path.join(file_path,"./logs/log_") + datetime.now().strftime(self.__config_data['Custom']['Logging']['time_format']))
@@ -222,7 +222,7 @@ class TurnManager:
         while True:
 
             it_cnt = it_cnt + 1
-            self.__logger.info('[Iteration %.6d]' % it_cnt)
+            self.__logger.debug('[Iteration %.6d]' % it_cnt)
 
             if(it_cnt == 1):
                 #Special processing to initialize instantaneous state
@@ -240,7 +240,7 @@ class TurnManager:
             self.__mergeExec(decisions)
 
             #Sleep by rate
-            self.__logger.info('******************\n')
+            self.__logger.debug('******************\n')
             rate.sleep()
 
 

@@ -118,7 +118,7 @@ class Turn:
         This function will return the ownership of the turn.
 
         Returns:
-            int: ownership
+            str: could be "not_owned", "robot_turn", "human_turn"
         """
         return self.ownership
 
@@ -254,6 +254,7 @@ class TurnSegmenter:
 
         # Debug info: if the self.last_turn_ownership is not the same as "from" in "turn_ownership"
         if self.last_turn_ownership != turn_ownership_meta.get('from', 'unknown'):
+        # if turn_ownership_meta.get('transition', False):
             self.logger.error(
                 "last_turn_ownership: '%s' is not the same as turn transition info '%s'",
                 self.last_turn_ownership, turn_ownership_meta.get('from', 'unknown')

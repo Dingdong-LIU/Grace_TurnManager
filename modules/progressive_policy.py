@@ -65,8 +65,9 @@ class ProgressivePolicy:
 
     def applyPolicy(self, state_dict):
         # Yield the robot's turn if robot finish talking
-        robot_speaking = state_dict['robot_speaking']['val']
-        if robot_speaking == "not_speaking":
+        robot_speaking_meta = state_dict['robot_speaking']
+        
+        if robot_speaking_meta['val'] == "not_speaking" and robot_speaking_meta["transition"]:
             # Yield robot's turn
             self.action_composer.publish_turn_yielding_signal()
             pass
@@ -95,6 +96,12 @@ class ProgressivePolicy:
         if turn is None:
             return None
         
+        print(f"Emotion={turn.get_emotion()}. Attention={turn.get_attention()}. Engagement={turn.get_engagement_level()}")
+        # print(turn.get_ownership())
+        # # Take the turn as a previous human turn is over
+        # if turn.ownership == "human_turn":
+        #     self.action_composer.publish_turn_taking_signal()
+
         # if a task is being processed, then wait for it to finish - don't accept any turn object at the time
         if self.processing_task is not None:
             if self.processing_task.is_alive():

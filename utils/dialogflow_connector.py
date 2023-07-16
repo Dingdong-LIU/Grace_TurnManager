@@ -87,9 +87,17 @@ class DialogflowConnector:
                 "intent" : "(Q0.Success) How are you - Bad",
             }
         }
-        if asr_text in [
+        if asr_text == self.revert_magic_string:
+            return {
+                "responses" : {
+                    "intent" : "",
+                    "text" : ""
+                    }
+            }
+        
+        elif asr_text in [
             self.repeat_magic_string, self.gracefully_end_magic_string,
-            self.revert_magic_string, self.start_conversation_magic_string]:
+            self.start_conversation_magic_string]:
             response["responses"]["text"] = asr_text
         else:
             response["responses"]["text"] = "This is a fake reponse from Grace. You must have waited for 1.5 seconds! Count 1 2 3 4 5 6 7 8 9 10."
@@ -105,6 +113,7 @@ class DialogflowConnector:
     # frequent barge-in
         # let go of this question if too much barge-in
     def revert_last_turn(self):
+        # TODO: check with Willy what is the exact behaviour of revert string
         self.logger.info("Revert previous sentence with magic string: %s", self.revert_magic_string)
         response = self.communicate(asr_text=self.revert_magic_string)
         return response
