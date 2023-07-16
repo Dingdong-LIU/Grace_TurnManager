@@ -56,8 +56,8 @@ class ProgressivePolicy:
         else:
             # get user's sentence from the turn object
             user_utterance = turn.get_asr() # This function may need some time to execute
-
-            utterance, params = self.chatbot.communicate(user_utterance)
+            res = self.chatbot.communicate(user_utterance)
+            utterance, params = self.action_composer.parse_reply_from_chatbot(res)
             req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
             return req
 
@@ -65,20 +65,31 @@ class ProgressivePolicy:
 
     def applyPolicy(self, state_dict):
         # Yield the robot's turn if robot finish talking
-        robot_speaking = state_dict['robot_speaking']
+        robot_speaking = state_dict['robot_speaking']['val']
         if robot_speaking == "not_speaking":
             # Yield robot's turn
             self.action_composer.publish_turn_yielding_signal()
             pass
         
         # Handle Barge-in: when robot is speaking and patient is speaking
+        # Immediately let robot to stop and hand over the turn ownership
         robot_turn = (state_dict["turn_ownership"]["val"] == 'robot_turn')
         human_speaking = (state_dict["human_speaking"]["val"] == "speaking")
         if robot_turn and human_speaking:
+            # Immediately create a stop processing action for robot
             self.action_composer.publish_turn_yielding_signal()
+            # Send a revert request to the chatbot
+            self.revert_task = ThreadWithReturnValue(target=self.chatbot.revert_last_turn)
+            self.revert_task.start()
+
             req = self.action_composer.stop_talking_action()
+            self.turn_segmenter.reconstruct_flag = True
+            
             return req
 
+        # Get the turn object. 
+        # If this is exact a transition time, a turn object is created
+        # Otherwise None is returned
         turn = self.turn_segmenter.update_turn_information(state_dict)
         # if turn object is none, then there is no turn need to be processed, return empty actions
         if turn is None:
@@ -96,16 +107,15 @@ class ProgressivePolicy:
 
         # if turn object is not none and it is not a reconstructed turn, then there is a turn need to be processed
         if turn.get_ownership() == "human_turn": 
-            if not turn.reconstruct_flag:
-                # start a thread to process human turn
-                self.processing_task = ThreadWithReturnValue(target=self.process_human_turn, args=(turn,))
-            else:
-                # process a reconstructed human turn
-                # First send a revert request to the chatbot
-                self.revert_task = ThreadWithReturnValue(target=self.chatbot.revert_last_turn)
-                # Then start a thread to process human turn
-                self.processing_task = ThreadWithReturnValue(target=self.process_human_turn, args=(turn,))
-        else:
+            # if not turn.reconstruct_flag:
+            #     # start a thread to process human turn
+            #     self.processing_task = ThreadWithReturnValue(target=self.process_human_turn, args=(turn,))
+            #     self.processing_task.start()
+            # else:
+            # Then start a thread to process human turn
+            self.processing_task = ThreadWithReturnValue(target=self.process_human_turn, args=(turn,))
+            self.processing_task.start()
+        else:   
             return None
     
     def initialize_conversation(self):

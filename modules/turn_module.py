@@ -149,7 +149,7 @@ class TurnSegmenter:
         # Sensor inputs
         self.asr_listener = asr_listener
         self.emotion_listener = emotion_listener
-        self.VAD = None
+        # self.VAD = None
 
         # Robot high level action state - whether robot is doing meanful replies
         self.in_action = False
@@ -167,6 +167,9 @@ class TurnSegmenter:
 
         # Turn action composer
         self.turn_action_composer = action_composer
+
+        # Barge-in flag
+        self.reconstruct_flag = False
 
     def construct_turn(self, turn_ownership:str):
         # TODO: solve the timing issue: if the turn is constructed too early, the asr input will be empty. How to choose between the asr sentence stream and the asr word stream?
@@ -243,19 +246,33 @@ class TurnSegmenter:
             self.logger.error("Current turn ownership is unknown")
             return None
 
-
         if current_turn_ownership == self.last_turn.get_ownership():
             # Do nothing if turn ownership does not change
             # Return None
             return None
         # Construct a new turn object if turn ownership changes
 
+        # Debug info: if the self.last_turn_ownership is not the same as "from" in "turn_ownership"
+        if self.last_turn_ownership != turn_ownership_meta.get('from', 'unknown'):
+            self.logger.error(
+                "last_turn_ownership: '%s' is not the same as turn transition info '%s'",
+                self.last_turn_ownership, turn_ownership_meta.get('from', 'unknown')
+            )
+        # Turn object is constructed at the end of a turn, so the ownership is last turn ownership
+        last_turn_ownership = turn_ownership_meta.get("from", "unknown")
+
         # Consider a mis-segmentation if the time span is too short and now it is a human's turn
         if self.last_human_turn and current_turn_ownership == "human_turn" and time.time() - self.last_turn.get_timestamp() < self.timeout:
             # Mis-segmentation happens
             # # Signal the robot to stop all actions, if any
             # self.turn_action_composer.publish_stop_talking_action()
-            # Redo the last human turn
-            new_turn_object = self.redo_turn(turn_ownership=current_turn_ownership)
-        new_turn_object = self.construct_turn(turn_ownership=current_turn_ownership)
+            # Indicate there is a need to redo the last human turn
+            # new_turn_object = self.redo_turn(turn_ownership=current_turn_ownership)
+            self.reconstruct_flag = True
+        
+        # Consider a reconstruct when there is a barge in
+        if self.reconstruct_flag:
+            new_turn_object = self.redo_turn(turn_ownership=last_turn_ownership)
+        else:
+            new_turn_object = self.construct_turn(turn_ownership=last_turn_ownership)
         return new_turn_object
