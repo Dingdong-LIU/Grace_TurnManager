@@ -60,13 +60,16 @@ class TurnManager:
     def __init__(self, config_data):
         #Miscellaneous
         signal(SIGINT, handle_sigint)
+
+        #Config
+        self.__config_data = config_data
+
         self.__logger = setupLogger(
                     logging.DEBUG, 
                     logging.INFO, 
                     self.__class__.__name__,
-                    "./logs/log_" + datetime.now().strftime("%a_%d_%b_%Y_%I_%M_%S_%p"))
+                    os.path.join(file_path,"./logs/log_") + datetime.now().strftime(self.__config_data['Custom']['Logging']['time_format']))
         
-        self.__config_data = config_data
 
         rospy.init_node(self.__config_data['TM']['Ros']['node_name'])
         self.__nh = True
