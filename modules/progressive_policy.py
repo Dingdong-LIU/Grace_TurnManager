@@ -24,7 +24,7 @@ class ProgressivePolicy:
 
         self.action_composer = ActionComposer(
             database_file=config["TM"]["Database"]["path"],
-            action_publisher_path=config["Custom"]["TM"]["turn_action_topic"]
+            config=config
         )
     
     def set_fake_chatbot(self, use_fake_chatbot):
@@ -40,13 +40,13 @@ class ProgressivePolicy:
         if engagement_level == "agitated":
             res = self.chatbot.gracefully_end()
             utterance, params = self.action_composer.parse_reply_from_chatbot(res)
-            req = self.action_composer.compose_req(command="exec", utterance=utterance, params=params)
+            req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
             return req
         # If the engagement level is "distracted", then ask the user to repeat
         elif engagement_level == "distracted":
             res = self.chatbot.repeat()
             utterance, params = self.action_composer.parse_reply_from_chatbot(res)
-            req = self.action_composer.compose_req(command="exec", utterance=utterance, params=params)
+            req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
             return req
         # If the engagement level is "engaged" or "undefined", then process user's utterance
         # communicate with the chatbot and wrap the response into a request
@@ -55,7 +55,7 @@ class ProgressivePolicy:
             user_utterance = turn.get_asr() # This function may need some time to execute
 
             utterance, params = self.chatbot.communicate(user_utterance)
-            req = self.action_composer.compose_req(command="exec", utterance=utterance, params=params)
+            req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
             return req
 
 
@@ -97,6 +97,8 @@ class ProgressivePolicy:
             return None
     
     def initialize_conversation(self):
+        # indicate robot wants to take turn
+        self.action_composer.publish_turn_taking_action()
         # Construct an initial turn object
         initial_turn = Turn(ownership="robot_turn", time_stamp=time.time())
         self.turn_segmenter.last_turn = initial_turn
@@ -104,5 +106,5 @@ class ProgressivePolicy:
         # Ask the robot to start conversation
         res = self.chatbot.start_conversation()
         utterance, params = self.action_composer.parse_reply_from_chatbot(res)
-        req = self.action_composer.compose_req(command="exec", utterance=utterance, params=params)
+        req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
         return req

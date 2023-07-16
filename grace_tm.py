@@ -126,7 +126,6 @@ class TurnManager:
 
         initial_action = self.__policy_progressive.initialize_conversation()
         # Execute the "start conversation action"
-        # Yifan note: SHOULD STILL HAVE TURN-TAKING AND YIELDING ACTION!!
         self.__logger.info(initial_action)
         #self.__mergeExec(initial_action)
 
@@ -160,7 +159,12 @@ class TurnManager:
             #If there is, apply the speech action from prog part
 
             #Yifan note: decode the dict output and implement action execution command
-            self.__logger.info("Speech: %s" % decisions['prog_act'])
+            if decisions['prog_act'] is not None:
+                progressive_action = decisions['prog_act']
+                self.__speak_behav_exec.initiateBehaviorThread(self.__composeBehavReq(
+                    cmd=progressive_action['cmd'], args=progressive_action['content'])
+                )
+                self.__logger.info("Speech: %s" % decisions['prog_act'])
 
         else:
             #If no action from the progressive side, apply actions from the inst part (if any)
