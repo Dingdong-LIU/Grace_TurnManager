@@ -43,6 +43,8 @@ class ASR_Word_Stream:
 
     def get_current_sentence(self):
         #  TODO: Confirm if we need a mannual cache clean
+        # or a sleep to get the sull asr?
+        # time.sleep(1)
         return self.word
 
 
