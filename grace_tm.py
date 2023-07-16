@@ -194,7 +194,7 @@ class TurnManager:
            req.command == self.__config_data['BehavExec']['General']['hum_behav_exec_cmd']):
 
             req.utterance = args['utterance']
-            req.lang = args['lang']
+            req.lang = self.__config_data['BehavExec']['TTS']['tts_language_code']
 
             req.expressions = args['expressions']
             req.exp_start = args['exp_start']

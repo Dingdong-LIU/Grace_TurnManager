@@ -96,7 +96,7 @@ class ProgressivePolicy:
         if turn is None:
             return None
         
-        print(f"Emotion={turn.get_emotion()}. Attention={turn.get_attention()}. Engagement={turn.get_engagement_level()}")
+        # print(f"Emotion={turn.get_emotion()}. Attention={turn.get_attention()}. Engagement={turn.get_engagement_level()}")
         # print(turn.get_ownership())
         # # Take the turn as a previous human turn is over
         # if turn.ownership == "human_turn":
