@@ -258,6 +258,8 @@ class TurnSegmenter:
                 "last_turn_ownership: '%s' is not the same as turn transition info '%s'",
                 self.last_turn_ownership, turn_ownership_meta.get('from', 'unknown')
             )
+
+        
         # Turn object is constructed at the end of a turn, so the ownership is last turn ownership
         last_turn_ownership = turn_ownership_meta.get("from", "unknown")
 
@@ -269,6 +271,7 @@ class TurnSegmenter:
             # Indicate there is a need to redo the last human turn
             # new_turn_object = self.redo_turn(turn_ownership=current_turn_ownership)
             self.reconstruct_flag = True
+            self.logger.warn("Potential mis-segmentation as time span is too short and now it is a human's turn")
         
         # Consider a reconstruct when there is a barge in
         if self.reconstruct_flag:

@@ -92,7 +92,7 @@ class DialogflowConnector:
             self.revert_magic_string, self.start_conversation_magic_string]:
             response["responses"]["text"] = asr_text
         else:
-            response["responses"]["text"] = "This is a fake reponse from Grace. You must have waited for 1.5 seconds!"
+            response["responses"]["text"] = "This is a fake reponse from Grace. You must have waited for 1.5 seconds! Count 1 2 3 4 5 6 7 8 9 10."
         # if this is not a magic string then return the fake response sentence
         
         self.logger.debug("Received replies from chatbot: %s", str(response))
