@@ -130,8 +130,6 @@ class TurnManager:
         self.__logger.info(initial_action)
         #self.__mergeExec(initial_action)
 
-
-
     def __applyPolicy(self):
         decisions = {}
 
@@ -173,7 +171,8 @@ class TurnManager:
 
             humming_action = decisions['inst_act']['bc_action']['hum']
             if(humming_action != None):
-                self.__logger.info('Humming: %s' % humming_action)
+                self.__hum_behav_exec.initiateBehaviorThread(self.__composeBehavReq(humming_action['cmd'],humming_action['content']))
+                self.__logger.info('Humming: %s' % humming_action['cmd'])
 
     def __composeBehavReq(self, cmd, args = None):
         req = grace_attn_msgs.srv.GraceBehaviorRequest()
