@@ -19,8 +19,12 @@ class ActionComposer:
         self.req = None
         self.lang = config["BehavExec"]["TTS"]["tts_language_code"]
         self.logger = logging.getLogger(__name__)
+        self.__config = config
 
-        # self.turn_action_publisher = rospy.Publisher(action_publisher_path, data_class=std_msgs.msg.String, queue_size=100)
+        self.turn_action_publisher = rospy.Publisher(
+                                        self.__config['Custom']['TM']['turn_action_topic'], 
+                                        data_class=std_msgs.msg.String, 
+                                        queue_size=config['Custom']['Ros']['queue_size'])
 
     def parse_reply_from_chatbot(self, res:dict):
         intent = res["responses"]['intent']
@@ -45,12 +49,16 @@ class ActionComposer:
         Returns:
             dict: a request dict with "cmd" and "content" field
         """        
-        action_content = params
-        action_content['utterance'] = utterance
-        action_content['lang'] = self.lang
+        if utterance=="" and params is None:
+            # when compose a stop action, params is None and utterance is empty
+            action_content = None
+        else:
+            action_content = params
+            action_content['utterance'] = utterance
+            action_content['lang'] = self.lang
         req = {
             "cmd": command,
-            "content" : utterance
+            "content" : action_content
         }
         return req
 
@@ -74,8 +82,17 @@ class ActionComposer:
     #     self.req.lang = self.lang
     #     return self.req
     
-    def publish_turn_taking_action(self):
-        self.turn_action_publisher.publish("robot_take_turn")
+    def publish_turn_taking_signal(self):
+        self.turn_action_publisher.publish(self.__config['InstState']['TurnAction']['robot_take_turn_action_name'])
 
-    def publish_turn_yielding_action(self):
-        self.turn_action_publisher.publish("robot_yield_turn")
+    def publish_turn_yielding_signal(self):
+        self.turn_action_publisher.publish(self.__config['InstState']['TurnAction']['robot_yield_turn_action_name'])
+    
+    def stop_talking_action(self):
+        # self.publish_turn_yielding_signal()
+        req = self.compose_req(
+            command=self.__config["BehavExec"]["General"]["utterance_behav_stop_cmd"],
+            utterance="",
+            params=None
+        )
+        return req

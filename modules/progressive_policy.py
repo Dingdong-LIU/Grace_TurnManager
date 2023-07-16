@@ -14,25 +14,28 @@ class ProgressivePolicy:
     def __init__(self, asr_listener, emotion_listener, config:dict):
         self.chatbot = DialogflowConnector()
 
+        self.action_composer = ActionComposer(
+            database_file=config["TM"]["Database"]["path"],
+            config=config
+        )
+
         self.turn_segmenter = TurnSegmenter(
             asr_listener=asr_listener,
-            emotion_listener=emotion_listener
+            emotion_listener=emotion_listener,
+            action_composer= self.action_composer
         )
 
         self.processing_task = None
         self.revert_task = None # only for debugging purpose
 
-        self.action_composer = ActionComposer(
-            database_file=config["TM"]["Database"]["path"],
-            config=config
-        )
+        
     
     def set_fake_chatbot(self, use_fake_chatbot):
         self.chatbot.debug_mode(enabled=use_fake_chatbot)
     
     def process_human_turn(self, turn:Turn) -> grace_attn_msgs.srv.GraceBehaviorRequest:
         # indicate robot wants to take turn
-        self.action_composer.publish_turn_taking_action()
+        self.action_composer.publish_turn_taking_signal()
 
         # get the engagement level
         engagement_level = turn.get_engagement_level()
@@ -65,8 +68,17 @@ class ProgressivePolicy:
         robot_speaking = state_dict['robot_speaking']
         if robot_speaking == "not_speaking":
             # Yield robot's turn
-            self.action_composer.publish_turn_yielding_action()
+            self.action_composer.publish_turn_yielding_signal()
             pass
+        
+        # Handle Barge-in: when robot is speaking and patient is speaking
+        robot_turn = (state_dict["turn_ownership"]["val"] == 'robot_turn')
+        human_speaking = (state_dict["human_speaking"]["val"] == "speaking")
+        if robot_turn and human_speaking:
+            self.action_composer.publish_turn_yielding_signal()
+            req = self.action_composer.stop_talking_action()
+            return req
+
         turn = self.turn_segmenter.update_turn_information(state_dict)
         # if turn object is none, then there is no turn need to be processed, return empty actions
         if turn is None:
@@ -98,7 +110,7 @@ class ProgressivePolicy:
     
     def initialize_conversation(self):
         # indicate robot wants to take turn
-        self.action_composer.publish_turn_taking_action()
+        self.action_composer.publish_turn_taking_signal()
         # Construct an initial turn object
         initial_turn = Turn(ownership="robot_turn", time_stamp=time.time())
         self.turn_segmenter.last_turn = initial_turn

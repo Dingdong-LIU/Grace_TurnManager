@@ -115,19 +115,22 @@ class TurnManager:
             # Start the policy
             self.__policy_progressive = ProgressivePolicy(
                 asr_listener=asr_listener,
-                emotion_listener=emotion_listener
+                emotion_listener=emotion_listener,
+                config=self.__config_data
             )
             # Set the fake chatbot
             if self.__config_data["TM"]["Debug"].get("fake_chatbot", False):
-                self.__policy_progressive.set_fake_chatbot()
+                self.__policy_progressive.set_fake_chatbot(self.__config_data["TM"]["Debug"]['fake_chatbot'])
 
     def __initiateDialogue(self):
         #For progressive part, initialize turn and trigger first action
 
         initial_action = self.__policy_progressive.initialize_conversation()
         # Execute the "start conversation action"
+        self.__speak_behav_exec.initiateBehaviorThread(self.__composeBehavReq(
+            cmd=initial_action['cmd'], args=initial_action['content'])
+        )
         self.__logger.info(initial_action)
-        #self.__mergeExec(initial_action)
 
     def __applyPolicy(self):
         decisions = {}

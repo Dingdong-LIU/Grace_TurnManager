@@ -5,6 +5,7 @@ import time
 import threading
 from utils.asr_connector import ASR_Interim_Sentence, ASR_Word_Stream
 from utils.emotion_connector import FE_Connector
+from utils.action_composer import ActionComposer
 # import os
 # import sys
 
@@ -135,7 +136,12 @@ class TurnSegmenter:
     """
     This Segmenter segments sensor inputs into turns
     """
-    def __init__(self, asr_listener: Union[ASR_Word_Stream, ASR_Interim_Sentence], emotion_listener:FE_Connector):
+    def __init__(
+            self, 
+            asr_listener: Union[ASR_Word_Stream, ASR_Interim_Sentence], 
+            emotion_listener:FE_Connector,
+            action_composer: ActionComposer
+        ):
         # Class functions
         # self.frequency = frequency
         self.logger = logging.getLogger(__name__)
@@ -158,6 +164,9 @@ class TurnSegmenter:
 
         # Timeout (seconds) for a new turn
         self.timeout = 5
+
+        # Turn action composer
+        self.turn_action_composer = action_composer
 
     def construct_turn(self, turn_ownership:str):
         # TODO: solve the timing issue: if the turn is constructed too early, the asr input will be empty. How to choose between the asr sentence stream and the asr word stream?
@@ -242,8 +251,10 @@ class TurnSegmenter:
         # Construct a new turn object if turn ownership changes
 
         # Consider a mis-segmentation if the time span is too short and now it is a human's turn
-        if current_turn_ownership == "human_turn" and time.time() - self.last_turn.get_timestamp() < self.timeout:
+        if self.last_human_turn and current_turn_ownership == "human_turn" and time.time() - self.last_turn.get_timestamp() < self.timeout:
             # Mis-segmentation happens
+            # # Signal the robot to stop all actions, if any
+            # self.turn_action_composer.publish_stop_talking_action()
             # Redo the last human turn
             new_turn_object = self.redo_turn(turn_ownership=current_turn_ownership)
         new_turn_object = self.construct_turn(turn_ownership=current_turn_ownership)

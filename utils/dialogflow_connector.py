@@ -81,12 +81,20 @@ class DialogflowConnector:
         """
         self.logger.debug("(Fake response) Start to communicate with chatbot: %s" ,asr_text)
         time.sleep(fake_latency) # sleep to fake the latency
+
         response = {
             "responses" : {
                 "intent" : "(Q0.Success) How are you - Bad",
-                "text" : "This is a fake reponse from Grace. You must have waited for 1.5 seconds!"
             }
         }
+        if asr_text in [
+            self.repeat_magic_string, self.gracefully_end_magic_string,
+            self.revert_magic_string, self.start_conversation_magic_string]:
+            response["responses"]["text"] = asr_text
+        else:
+            response["responses"]["text"] = "This is a fake reponse from Grace. You must have waited for 1.5 seconds!"
+        # if this is not a magic string then return the fake response sentence
+        
         self.logger.debug("Received replies from chatbot: %s", str(response))
         return response
     
