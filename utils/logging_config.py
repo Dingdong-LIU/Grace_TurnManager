@@ -18,7 +18,7 @@ file_handler.setLevel(logging.DEBUG)
 
 # Create a console handler
 console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
+console_handler.setLevel(logging.DEBUG)
 
 # Create a formatter for both console and file
 formatter = logging.Formatter('%(asctime)s.%(msecs)03d | %(name)s | %(levelname)s | %(message)s |', datefmt='%m-%d-%Y %H:%M:%S')
@@ -28,11 +28,15 @@ file_handler.setFormatter(formatter)
 console_handler.setFormatter(formatter)
 
 # Get the root logger
-root_logger = logging.getLogger()
+root_utils_logger = logging.getLogger('utils')
+root_modules_logger= logging.getLogger('modules')
 
 # Add the file handler to the root logger
-root_logger.addHandler(file_handler)
-# root_logger.addHandler(console_handler)
+root_utils_logger.addHandler(file_handler)
+root_utils_logger.addHandler(console_handler)
+
+root_modules_logger.addHandler(file_handler)
+root_modules_logger.addHandler(console_handler)
 
 
 

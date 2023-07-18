@@ -158,7 +158,7 @@ class TurnSegmenter:
         self.last_turn = None
         self.last_human_turn = None
 
-        # Last turn ownership, for debug purpose
+        # Last turn ownership, for debug purpose only, can safely ignore
         # could be "not_owned", "robot_turn", "human_turn"
         self.last_turn_ownership = 0
 
@@ -188,6 +188,8 @@ class TurnSegmenter:
         self.last_turn = turn
         if turn_ownership == "human_turn":
             self.last_human_turn = turn
+            # start to get human ASR when it is a human turn
+            asr_input_thread.start()
         return turn
 
     def get_asr_input(self) -> ThreadWithReturnValue:
@@ -206,10 +208,10 @@ class TurnSegmenter:
             # Get sentence from full sentence stream
             # asr = self.asr_listener.get_asr_full_sentence()
             asr_thread = ThreadWithReturnValue(target=self.asr_listener.get_current_sentence)
-        asr_thread.start()
+        # asr_thread.start()
         return asr_thread
 
-    def redo_turn(self, turn_ownership:str):
+    def redo_human_turn(self, turn_ownership:str):
         """
         This function will redo the last human turn. It will merge the current and last human turn to create a new turn object
         """
@@ -226,6 +228,9 @@ class TurnSegmenter:
         turn = Turn(
             ownership=turn_ownership, time_stamp=time.time(), asr_input_thread=asr_input_thread, emotion_input=emotion_input, attention_input=attention_input, exiting_asr=exiting_asr, reconstruct=True
         )
+        # start wait for ASR input from human
+        asr_input_thread.start()
+
         return turn
 
     def update_turn_information(self, state_dict):
@@ -233,8 +238,8 @@ class TurnSegmenter:
         This function will update the turn information. It will accumulate sensor information if no turn transition happens, but construct new turn objects if turn transition happens.
         """
         # Debug if turn ownership consistancy is broken
-        if self.last_turn.get_ownership() != self.last_turn_ownership:
-            self.logger.error("Turn ownership consistancy broken")
+        if self.last_turn and self.last_turn.get_ownership() != self.last_turn_ownership:
+            self.logger.info("Get turn update from instant policy, update turn ownership")
             self.last_turn_ownership = self.last_turn.get_ownership()
         
 
@@ -252,9 +257,10 @@ class TurnSegmenter:
             return None
         # Construct a new turn object if turn ownership changes
 
-        # Debug info: if the self.last_turn_ownership is not the same as "from" in "turn_ownership"
-        if self.last_turn_ownership != turn_ownership_meta.get('from', 'unknown'):
+        # Debug info: if there is a transition and the self.last_turn_ownership is not the same as "from" in "turn_ownership"
+        if state_dict["turn_ownership"].get("transition", False) and self.last_turn_ownership != turn_ownership_meta.get('from', 'unknown'):
         # if turn_ownership_meta.get('transition', False):
+        # TODO: check self.last_turn == None
             self.logger.error(
                 "last_turn_ownership: '%s' is not the same as turn transition info '%s'",
                 self.last_turn_ownership, turn_ownership_meta.get('from', 'unknown')
@@ -276,7 +282,14 @@ class TurnSegmenter:
         
         # Consider a reconstruct when there is a barge in
         if self.reconstruct_flag:
-            new_turn_object = self.redo_turn(turn_ownership=last_turn_ownership)
+            # For the first human turn, do not redo the turn
+            if self.last_human_turn is None:
+                new_turn_object = self.construct_turn(turn_ownership=last_turn_ownership)
+                self.logger.warn("Tried to revert the first Human turn. Discard this action and construct a normal turn")
+            else:
+                # Only redo turn when there is previous human turn
+                new_turn_object = self.redo_human_turn(turn_ownership=last_turn_ownership)
+                self.reconstruct_flag = False
         else:
             new_turn_object = self.construct_turn(turn_ownership=last_turn_ownership)
         return new_turn_object

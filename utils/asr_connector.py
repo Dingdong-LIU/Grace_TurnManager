@@ -34,7 +34,7 @@ class ASR_Word_Stream:
         self.word = msg.utterance
         self.timestamp = time.time()
         self.new_word = True
-        self.logger.info("ASR_WORD_STREAM: %s", self.word)
+        self.logger.info("%s: '%s' ", self.__class__.__name__, self.word)
 
     def get_time_stamp(self) :
         output = (self.new_word, self.timestamp)
@@ -103,7 +103,7 @@ class ASR_Interim_Sentence:
         self.sentence_format["audio_path"] = msg.audio_path
 
 
-        self.logger.info("ASR_SENTENCE_STREAM: Obtained sentence (%s) from ASR", self.asr_full_sentence)
+        self.logger.info("%s: '%s' ", self.__class__.__name__, self.asr_full_sentence)
 
         self.new_sentence = True
         self.timestamp = time.time()
@@ -124,7 +124,14 @@ class ASR_Interim_Sentence:
         return output
 
     def get_current_sentence(self):
-        while True:
+        start_waiting_time = time.time()
+        timeout = False
+        while not timeout:
             wait, sentence = self.get_full_sentence()
             if not wait:
                 return sentence
+            # update timeout
+            timeout = (time.time() - start_waiting_time) > 1
+        
+        self.logger.error("%s ASR timeout, return previous sentence %s", self.__class__.__name__, sentence)
+        return sentence

@@ -131,6 +131,7 @@ class ProgressivePolicy:
         # Construct an initial turn object
         initial_turn = Turn(ownership="robot_turn", time_stamp=time.time())
         self.turn_segmenter.last_turn = initial_turn
+        self.turn_segmenter.last_turn_ownership = initial_turn.get_ownership()
 
         # Ask the robot to start conversation
         res = self.chatbot.start_conversation()

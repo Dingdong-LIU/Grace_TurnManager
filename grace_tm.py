@@ -1,6 +1,5 @@
 #general
 import yaml
-import rospy
 import os
 import re
 import threading
@@ -13,17 +12,6 @@ import time
 from inspect import getsourcefile
 from os.path import abspath
 
-
-import dynamic_reconfigure.client
-import sensor_msgs.msg
-import std_msgs.msg
-import hr_msgs.msg
-import grace_attn_msgs.msg
-import grace_attn_msgs.srv
-import hr_msgs.msg
-import hr_msgs.cfg
-import hr_msgs.srv
-import std_msgs
 
 
 
@@ -52,6 +40,19 @@ from utils.emotion_connector import FE_Connector
 # import progressive policy module
 from modules.progressive_policy import ProgressivePolicy
 
+
+
+import rospy
+import dynamic_reconfigure.client
+import sensor_msgs.msg
+import std_msgs.msg
+import hr_msgs.msg
+import grace_attn_msgs.msg
+import grace_attn_msgs.srv
+import hr_msgs.msg
+import hr_msgs.cfg
+import hr_msgs.srv
+import std_msgs
 
 
 
@@ -112,7 +113,8 @@ class TurnManager:
             # self.__policy_turn = None
 
             # Start the ASR service
-            asr_listener = ASR_Word_Stream(self.__config_data["HR"])
+            # asr_listener = ASR_Word_Stream(self.__config_data["HR"])
+            asr_listener = ASR_Interim_Sentence(self.__config_data["HR"])
             # Start the vision module
             emotion_listener = FE_Connector(self.__config_data["Custom"])
             # Start the policy
