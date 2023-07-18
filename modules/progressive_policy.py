@@ -68,6 +68,7 @@ class ProgressivePolicy:
         # Yield the robot's turn if robot finish talking
         robot_speaking_meta = state_dict['robot_speaking']
         
+        # self.__logger.info("R Speaking %s %s" % (robot_speaking_meta['val'],robot_speaking_meta['transition']))
         if robot_speaking_meta['val'] == "not_speaking" and robot_speaking_meta["transition"]:
             # Yield robot's turn
             self.action_composer.publish_turn_yielding_signal()
@@ -78,18 +79,21 @@ class ProgressivePolicy:
         robot_turn = (state_dict["turn_ownership"]["val"] == 'robot_turn')
         human_speaking = (state_dict["human_speaking"]["val"] == "speaking")
 
-        self.__logger.info("Decision %s %s" % (state_dict['human_speaking']['val'],state_dict['turn_ownership']['val']))
+        # self.__logger.info("Decision %s %s" % (state_dict['human_speaking']['val'],state_dict['turn_ownership']['val']))
         
         if robot_turn and human_speaking:
+            
+            req = self.action_composer.stop_talking_action()
+
             # Immediately create a stop processing action for robot
             self.action_composer.publish_turn_yielding_signal()
+
+            self.turn_segmenter.reconstruct_flag = True
+            
             # Send a revert request to the chatbot
             self.revert_task = ThreadWithReturnValue(target=self.chatbot.revert_last_turn)
             self.revert_task.start()
 
-            req = self.action_composer.stop_talking_action()
-            self.turn_segmenter.reconstruct_flag = True
-            
             return req
 
         # Check if there is a finished turn processing result

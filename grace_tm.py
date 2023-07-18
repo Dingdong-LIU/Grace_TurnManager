@@ -166,6 +166,10 @@ class TurnManager:
         if('prog_act' in decisions):
             #If there is, apply the speech action from prog part
 
+            #Debug
+            # self.__logger.info(decisions['prog_act'])
+
+
             #Yifan note: decode the dict output and implement action execution command
             if decisions['prog_act'] is not None:
                 progressive_action = decisions['prog_act']
@@ -235,8 +239,8 @@ class TurnManager:
                 #Update instantaneous states
                 self.__state_monitor_inst.updateState()
             
-            #debug
-            self.__logger.info("Feed %s %s" % (self.__state_monitor_inst.getState()['human_speaking']['val'],self.__state_monitor_inst.getState()['turn_ownership']['val']))
+            # #debug
+            # self.__logger.info("Feed %s %s" % (self.__state_monitor_inst.getState()['human_speaking']['val'],self.__state_monitor_inst.getState()['turn_ownership']['val']))
 
 
             #Apply policies
