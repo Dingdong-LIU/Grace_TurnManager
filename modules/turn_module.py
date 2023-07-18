@@ -186,10 +186,14 @@ class TurnSegmenter:
             ownership=turn_ownership, time_stamp=time.time(), asr_input_thread=asr_input_thread, emotion_input=emotion_input, attention_input=attention_input
         )
         self.last_turn = turn
+        
         if turn_ownership == "human_turn":
             self.last_human_turn = turn
             # start to get human ASR when it is a human turn
             asr_input_thread.start()
+        
+        self.logger.debug("Consturct a new %s turn: %s", turn_ownership, turn)
+
         return turn
 
     def get_asr_input(self) -> ThreadWithReturnValue:
@@ -251,14 +255,16 @@ class TurnSegmenter:
             self.logger.error("Current turn ownership is unknown")
             return None
 
-        if current_turn_ownership == self.last_turn.get_ownership():
+        # This is a bug. Should use the turn_ownership_meta["transition"] instead, because internal state maintainance is not realtime
+        # if current_turn_ownership == self.last_turn.get_ownership():
+        if turn_ownership_meta.get("transition", False) == True:
             # Do nothing if turn ownership does not change
             # Return None
             return None
         # Construct a new turn object if turn ownership changes
 
         # Debug info: if there is a transition and the self.last_turn_ownership is not the same as "from" in "turn_ownership"
-        if state_dict["turn_ownership"].get("transition", False) and self.last_turn_ownership != turn_ownership_meta.get('from', 'unknown'):
+        if turn_ownership_meta.get("transition", False) and self.last_turn_ownership != turn_ownership_meta.get('from', 'unknown'):
         # if turn_ownership_meta.get('transition', False):
         # TODO: check self.last_turn == None
             self.logger.error(
