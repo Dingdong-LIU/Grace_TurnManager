@@ -228,7 +228,7 @@ class TurnManager:
         while True:
 
             it_cnt = it_cnt + 1
-            self.__logger.info('[Iteration %.6d]' % it_cnt)
+            self.__logger.debug('[Iteration %.6d]' % it_cnt)
 
             if(it_cnt == 1):
                 #Special processing to initialize instantaneous state
@@ -250,7 +250,7 @@ class TurnManager:
             self.__mergeExec(decisions)
 
             #Sleep by rate
-            self.__logger.info('******************\n')
+            self.__logger.debug('******************\n')
             rate.sleep()
 
 

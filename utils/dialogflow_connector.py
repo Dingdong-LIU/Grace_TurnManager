@@ -21,6 +21,7 @@ class DialogflowConnector:
         self.repeat_magic_string = "please repeat"
 
         self.communicate = self.real_communicate
+        self.call_count = 0
 
     def debug_mode(self, enabled=False):
         if enabled:
@@ -100,9 +101,9 @@ class DialogflowConnector:
             self.start_conversation_magic_string]:
             response["responses"]["text"] = asr_text
         else:
-            response["responses"]["text"] = "This is a fake reponse from Grace. You must have waited for 1.5 seconds! Count 1 2 3 4 5 6 7 8 9 10."
+            response["responses"]["text"] = f"Fake response {self.call_count}. You must have waited for 1.5 seconds! Count 1 2 3 4 5 6 7 8 9 10."
         # if this is not a magic string then return the fake response sentence
-        
+        self.call_count += 1
         self.logger.info("Received replies from chatbot: %s", str(response))
         return response
     
