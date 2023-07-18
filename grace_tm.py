@@ -224,7 +224,7 @@ class TurnManager:
         while True:
 
             it_cnt = it_cnt + 1
-            self.__logger.debug('[Iteration %.6d]' % it_cnt)
+            self.__logger.info('[Iteration %.6d]' % it_cnt)
 
             if(it_cnt == 1):
                 #Special processing to initialize instantaneous state
@@ -234,6 +234,10 @@ class TurnManager:
             else:
                 #Update instantaneous states
                 self.__state_monitor_inst.updateState()
+            
+            #debug
+            self.__logger.info("Feed %s %s" % (self.__state_monitor_inst.getState()['human_speaking']['val'],self.__state_monitor_inst.getState()['turn_ownership']['val']))
+
 
             #Apply policies
             decisions = self.__applyPolicy()
@@ -242,7 +246,7 @@ class TurnManager:
             self.__mergeExec(decisions)
 
             #Sleep by rate
-            self.__logger.debug('******************\n')
+            self.__logger.info('******************\n')
             rate.sleep()
 
 

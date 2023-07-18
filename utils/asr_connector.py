@@ -34,7 +34,7 @@ class ASR_Word_Stream:
         self.word = msg.utterance
         self.timestamp = time.time()
         self.new_word = True
-        self.logger.info("%s: '%s' ", self.__class__.__name__, self.word)
+        self.logger.debug("%s: '%s' ", self.__class__.__name__, self.word)
 
     def get_time_stamp(self) :
         output = (self.new_word, self.timestamp)
@@ -103,7 +103,7 @@ class ASR_Interim_Sentence:
         self.sentence_format["audio_path"] = msg.audio_path
 
 
-        self.logger.info("%s: '%s' ", self.__class__.__name__, self.asr_full_sentence)
+        self.logger.debug("%s: '%s' ", self.__class__.__name__, self.asr_full_sentence)
 
         self.new_sentence = True
         self.timestamp = time.time()

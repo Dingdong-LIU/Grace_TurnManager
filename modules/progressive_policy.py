@@ -4,7 +4,7 @@ import grace_attn_msgs.srv
 from utils.dialogflow_connector import DialogflowConnector
 from utils.action_composer import ActionComposer
 from modules.turn_module import TurnSegmenter, ThreadWithReturnValue, Turn
-
+import logging
 
 
 class ProgressivePolicy:
@@ -27,6 +27,7 @@ class ProgressivePolicy:
 
         self.processing_task = None
         self.revert_task = None # only for debugging purpose
+        self.__logger = logging.getLogger(__name__)
 
         
     
@@ -70,12 +71,15 @@ class ProgressivePolicy:
         if robot_speaking_meta['val'] == "not_speaking" and robot_speaking_meta["transition"]:
             # Yield robot's turn
             self.action_composer.publish_turn_yielding_signal()
-            pass
+            
         
         # Handle Barge-in: when robot is speaking and patient is speaking
         # Immediately let robot to stop and hand over the turn ownership
         robot_turn = (state_dict["turn_ownership"]["val"] == 'robot_turn')
         human_speaking = (state_dict["human_speaking"]["val"] == "speaking")
+
+        self.__logger.info("Decision %s %s" % (state_dict['human_speaking']['val'],state_dict['turn_ownership']['val']))
+        
         if robot_turn and human_speaking:
             # Immediately create a stop processing action for robot
             self.action_composer.publish_turn_yielding_signal()
@@ -88,13 +92,19 @@ class ProgressivePolicy:
             
             return req
 
-        # Get the turn object. 
-        # If this is exact a transition time, a turn object is created
-        # Otherwise None is returned
-        turn = self.turn_segmenter.update_turn_information(state_dict)
-        # if turn object is none, then there is no turn need to be processed, return empty actions
-        if turn is None:
-            return None
+        # Check if there is a finished turn processing result
+        req = None
+        if self.processing_task and not self.processing_task.is_alive():
+            req = self.processing_task.join()
+            self.processing_task = None
+
+        # # if turn object is none, then there is no turn need to be processed, only check the potential running process
+        # if turn is None:
+        #     if self.processing_task and not self.processing_task.is_alive():
+        #         req = self.processing_task.join()
+        #         self.processing_task = None
+        #         return req
+        #     return None
         
         # print(f"Emotion={turn.get_emotion()}. Attention={turn.get_attention()}. Engagement={turn.get_engagement_level()}")
         # print(turn.get_ownership())
@@ -103,17 +113,23 @@ class ProgressivePolicy:
         #     self.action_composer.publish_turn_taking_signal()
 
         # if a task is being processed, then wait for it to finish - don't accept any turn object at the time
-        if self.processing_task is not None:
-            if self.processing_task.is_alive():
-                return None
-            # if the task is finished, then get the result and return it
-            else:
-                req = self.processing_task.join()
-                self.processing_task = None
-                return req
+        # if self.processing_task is not None:
+        #     if self.processing_task.is_alive():
+        #         return None
+        #     # if the task is finished, then get the result and return it
+        #     else:
+        #         req = self.processing_task.join()
+        #         self.processing_task = None
+        #         return req
+
+        # Get the turn object. 
+        # If this is exact a transition time, a turn object is created
+        # Otherwise None is returned
+        turn = self.turn_segmenter.update_turn_information(state_dict)
+        
 
         # if turn object is not none and it is not a reconstructed turn, then there is a turn need to be processed
-        if turn.get_ownership() == "human_turn": 
+        if turn and turn.get_ownership() == "human_turn": 
             # if not turn.reconstruct_flag:
             #     # start a thread to process human turn
             #     self.processing_task = ThreadWithReturnValue(target=self.process_human_turn, args=(turn,))
@@ -121,9 +137,9 @@ class ProgressivePolicy:
             # else:
             # Then start a thread to process human turn
             self.processing_task = ThreadWithReturnValue(target=self.process_human_turn, args=(turn,))
-            self.processing_task.start()
-        else:   
-            return None
+            self.processing_task.start()  
+        
+        return req
     
     def initialize_conversation(self):
         # indicate robot wants to take turn

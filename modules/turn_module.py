@@ -192,7 +192,7 @@ class TurnSegmenter:
             # start to get human ASR when it is a human turn
             asr_input_thread.start()
         
-        self.logger.debug("Consturct a new %s turn: %s", turn_ownership, turn)
+        self.logger.info("Construct a new %s turn: %s", turn_ownership, turn)
 
         return turn
 
@@ -257,7 +257,7 @@ class TurnSegmenter:
 
         # This is a bug. Should use the turn_ownership_meta["transition"] instead, because internal state maintainance is not realtime
         # if current_turn_ownership == self.last_turn.get_ownership():
-        if turn_ownership_meta.get("transition", False) == True:
+        if not turn_ownership_meta.get("transition", False):
             # Do nothing if turn ownership does not change
             # Return None
             return None
