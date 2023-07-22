@@ -38,7 +38,7 @@ class Turn:
     """
     A turn is a combination of ASR input and emotion input.
     """
-    def __init__(self, ownership="robot_turn", asr_input_thread=None, emotion_input=None, attention_input=None, exiting_asr = None, reconstruct = False, time_stamp=0):
+    def __init__(self, ownership="robot_turn", asr_input_thread=None, emotion_input=None, attention_input=None, exiting_asr = "", reconstruct = False, time_stamp=0):
         # sensor data for extraction
         self.asr_input = None
         self.asr_input_thread = asr_input_thread
@@ -302,8 +302,8 @@ class TurnSegmenter:
                 self.logger.warn("Tried to revert the first Human turn. Discard this action and construct a normal turn")
             else:
                 # Only redo turn when there is previous human turn
-                new_turn_object = self.redo_human_turn(turn_ownership=last_turn_ownership)
                 self.reconstruct_flag = False
+                new_turn_object = self.redo_human_turn(turn_ownership=last_turn_ownership)
         else:
             new_turn_object = self.construct_turn(turn_ownership=last_turn_ownership)
         return new_turn_object

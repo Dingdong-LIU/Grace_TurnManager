@@ -72,7 +72,7 @@ class ASR_Interim_Sentence:
             queue_size=100
         )
         # Variables to be filled
-        self.asr_full_sentence = None
+        self.asr_full_sentence = ""
         self.sentence_format = {
             "lang" : "", "confidence": 0,
             "source" : "", "audio_path": "",

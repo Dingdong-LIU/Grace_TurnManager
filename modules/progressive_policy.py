@@ -86,18 +86,17 @@ class ProgressivePolicy:
 
             self.turn_segmenter.reconstruct_flag = True
 
-            
-            # Send a revert request to the chatbot
-            self.revert_task = ThreadWithReturnValue(target=self.chatbot.revert_last_turn)
-            self.revert_task.start()
-
             # Discard the currently processing task, if any
             if not self.processing_task_pool.empty():
                 task_to_discard = self.processing_task_pool.get(block=False)
-            # set discard turn timestamp, human turn before this timestamp will be discarded
-            if self.turn_segmenter.last_human_turn: # omit the first turn barge-in
-                self.turn_segmenter.discard_turn = self.turn_segmenter.last_human_turn.create_time
 
+            
+            if self.turn_segmenter.last_human_turn: # omit the first turn barge-in
+                # set discard turn timestamp, human turn before this timestamp will be discarded
+                self.turn_segmenter.discard_turn = self.turn_segmenter.last_human_turn.create_time
+                # Send a revert request to the chatbot, if this is not the first turn
+                self.revert_task = ThreadWithReturnValue(target=self.chatbot.revert_last_turn)
+                self.revert_task.start()
             return req
 
         # Check if there is a finished turn processing result
