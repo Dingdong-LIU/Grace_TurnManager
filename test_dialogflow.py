@@ -18,8 +18,8 @@ if __name__ == "__main__":
                     __name__,
                     os.path.join("./logs/log_") + datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S"))
     l.info("Start test_dialogflow.py")
-    chatbot = DialogflowConnector(link="https://1cc3-143-89-145-170.ngrok-free.app")
-    chatbot.debug_mode(enabled=True)
+    chatbot = DialogflowConnector(link="https://44bb-143-89-145-170.ngrok-free.app")
+    chatbot.debug_mode(enabled=False)
     action_composer = ActionComposer(config=loadGraceConfigs())
 
     # start the conversation

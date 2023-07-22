@@ -103,7 +103,7 @@ class ASR_Interim_Sentence:
         self.sentence_format["audio_path"] = msg.audio_path
 
 
-        self.logger.debug("%s: '%s' ", self.__class__.__name__, self.asr_full_sentence)
+        self.logger.info("%s: '%s' ", self.__class__.__name__, self.asr_full_sentence)
 
         self.new_sentence = True
         self.timestamp = time.time()

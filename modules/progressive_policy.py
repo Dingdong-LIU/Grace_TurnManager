@@ -13,7 +13,7 @@ class ProgressivePolicy:
     This class is the progressive policy module of the Grace Pace Monitor.
     """
     def __init__(self, asr_listener, emotion_listener, config:dict):
-        self.chatbot = DialogflowConnector()
+        self.chatbot = DialogflowConnector(link=config["TM"]["DialogFlow"]["url"])
 
         self.action_composer = ActionComposer(
             database_file=config["TM"]["Database"]["path"],
