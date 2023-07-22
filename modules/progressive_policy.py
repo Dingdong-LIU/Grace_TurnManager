@@ -5,6 +5,7 @@ from utils.dialogflow_connector import DialogflowConnector
 from utils.action_composer import ActionComposer
 from modules.turn_module import TurnSegmenter, ThreadWithReturnValue, Turn
 import logging
+import queue
 
 
 class ProgressivePolicy:
@@ -25,7 +26,9 @@ class ProgressivePolicy:
             action_composer= self.action_composer
         )
 
-        self.processing_task = None
+        # self.processing_task = None
+        # Initialize a Queue of size 10 for processing turn object
+        self.processing_task_pool = queue.Queue(maxsize=10)
         self.revert_task = None # only for debugging purpose
         self.__logger = logging.getLogger(__name__)
 
@@ -45,13 +48,11 @@ class ProgressivePolicy:
             res = self.chatbot.gracefully_end()
             utterance, params = self.action_composer.parse_reply_from_chatbot(res)
             req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
-            return req
         # If the engagement level is "distracted", then ask the user to repeat
         elif engagement_level == "distracted":
             res = self.chatbot.repeat()
             utterance, params = self.action_composer.parse_reply_from_chatbot(res)
             req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
-            return req
         # If the engagement level is "engaged" or "undefined", then process user's utterance
         # communicate with the chatbot and wrap the response into a request
         else:
@@ -60,15 +61,14 @@ class ProgressivePolicy:
             res = self.chatbot.communicate(user_utterance)
             utterance, params = self.action_composer.parse_reply_from_chatbot(res)
             req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
-            return req
+
+        return req
 
 
 
     def applyPolicy(self, state_dict):
         # Yield the robot's turn if robot finish talking
         robot_speaking_meta = state_dict['robot_speaking']
-        
-        # self.__logger.info("R Speaking %s %s" % (robot_speaking_meta['val'],robot_speaking_meta['transition']))
         if robot_speaking_meta['val'] == "not_speaking" and robot_speaking_meta["transition"]:
             # Yield robot's turn
             self.action_composer.publish_turn_yielding_signal()
@@ -78,9 +78,6 @@ class ProgressivePolicy:
         # Immediately let robot to stop and hand over the turn ownership
         robot_turn = (state_dict["turn_ownership"]["val"] == 'robot_turn')
         human_speaking = (state_dict["human_speaking"]["val"] == "speaking")
-
-        # self.__logger.info("Decision %s %s" % (state_dict['human_speaking']['val'],state_dict['turn_ownership']['val']))
-        
         if robot_turn and human_speaking:
             
             req = self.action_composer.stop_talking_action()
@@ -94,54 +91,41 @@ class ProgressivePolicy:
             self.revert_task = ThreadWithReturnValue(target=self.chatbot.revert_last_turn)
             self.revert_task.start()
 
+            # Discard the currently processing task
+            task_to_discard = self.processing_task_pool.get(block=False)
             return req
 
         # Check if there is a finished turn processing result
         req = None
-        if self.processing_task and not self.processing_task.is_alive():
-            req = self.processing_task.join()
-            self.processing_task = None
 
-        # # if turn object is none, then there is no turn need to be processed, only check the potential running process
-        # if turn is None:
-        #     if self.processing_task and not self.processing_task.is_alive():
-        #         req = self.processing_task.join()
-        #         self.processing_task = None
-        #         return req
-        #     return None
-        
-        # print(f"Emotion={turn.get_emotion()}. Attention={turn.get_attention()}. Engagement={turn.get_engagement_level()}")
-        # print(turn.get_ownership())
-        # # Take the turn as a previous human turn is over
-        # if turn.ownership == "human_turn":
-        #     self.action_composer.publish_turn_taking_signal()
+        ## Maintain the running task pool
 
-        # if a task is being processed, then wait for it to finish - don't accept any turn object at the time
-        # if self.processing_task is not None:
-        #     if self.processing_task.is_alive():
-        #         return None
-        #     # if the task is finished, then get the result and return it
-        #     else:
-        #         req = self.processing_task.join()
-        #         self.processing_task = None
-        #         return req
+        # Get the oldest task in the queue, but don't remove it
+        oldest_task = None if self.processing_task_pool.empty() else self.processing_task_pool[0]
+        # Check if this req need to be discarded. If it is, discard it
+        # As turn construction is much slower than mainloop. We only process one task per loop.
+        if oldest_task and oldest_task._args[0].create_time <= self.turn_segmenter.discard_turn:
+            self.processing_task_pool.get(block=False)
+
+        oldest_task = None if self.processing_task_pool.empty() else self.processing_task_pool[0]
+        if oldest_task and not oldest_task.is_alive():
+            # If the task is finished, then get the result
+            finished_task = self.processing_task_pool.get(block=False)
+            req = finished_task.join()
+
+
 
         # Get the turn object. 
         # If this is exact a transition time, a turn object is created
         # Otherwise None is returned
         turn = self.turn_segmenter.update_turn_information(state_dict)
-        
 
         # if turn object is not none and it is not a reconstructed turn, then there is a turn need to be processed
         if turn and turn.get_ownership() == "human_turn": 
-            # if not turn.reconstruct_flag:
-            #     # start a thread to process human turn
-            #     self.processing_task = ThreadWithReturnValue(target=self.process_human_turn, args=(turn,))
-            #     self.processing_task.start()
-            # else:
             # Then start a thread to process human turn
-            self.processing_task = ThreadWithReturnValue(target=self.process_human_turn, args=(turn,))
-            self.processing_task.start()  
+            latest_task = ThreadWithReturnValue(target=self.process_human_turn, args=(turn,))
+            latest_task.start()
+            self.processing_task_pool.put(latest_task, block=1)
         
         return req
     

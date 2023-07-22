@@ -171,6 +171,9 @@ class TurnSegmenter:
         # Barge-in flag
         self.reconstruct_flag = False
 
+        # discard turn time
+        self.discard_turn = 0
+
     def construct_turn(self, turn_ownership:str):
         # TODO: solve the timing issue: if the turn is constructed too early, the asr input will be empty. How to choose between the asr sentence stream and the asr word stream?
         """
@@ -192,7 +195,7 @@ class TurnSegmenter:
             # start to get human ASR when it is a human turn
             asr_input_thread.start()
         
-        self.logger.info("Construct a new %s turn: %s", turn_ownership, turn)
+        self.logger.info("Construct a new '%s' turn: %s", turn_ownership, turn)
 
         return turn
 
@@ -220,6 +223,10 @@ class TurnSegmenter:
         This function will redo the last human turn. It will merge the current and last human turn to create a new turn object
         """
         self.logger.info("Redoing human turn, concatenating the current and last human turn")
+        ## First need to discard the previous human turn object
+        self.discard_turn = self.last_human_turn.create_time
+        
+        ## Secondly construct a neew turn object
         # Get the asr input from the last turn
         exiting_asr = self.last_human_turn.get_asr()
 
@@ -234,6 +241,10 @@ class TurnSegmenter:
         )
         # start wait for ASR input from human
         asr_input_thread.start()
+
+        # update last turn information
+        self.last_human_turn = turn
+        self.last_turn = turn
 
         return turn
 
@@ -279,10 +290,7 @@ class TurnSegmenter:
         # Consider a mis-segmentation if the time span is too short and now it is a human's turn
         if self.last_human_turn and current_turn_ownership == "human_turn" and time.time() - self.last_turn.get_timestamp() < self.timeout:
             # Mis-segmentation happens
-            # # Signal the robot to stop all actions, if any
-            # self.turn_action_composer.publish_stop_talking_action()
             # Indicate there is a need to redo the last human turn
-            # new_turn_object = self.redo_turn(turn_ownership=current_turn_ownership)
             self.reconstruct_flag = True
             self.logger.warn("Potential mis-segmentation as time span is too short and now it is a human's turn")
         
