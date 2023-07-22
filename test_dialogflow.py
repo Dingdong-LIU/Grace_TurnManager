@@ -36,6 +36,7 @@ if __name__ == "__main__":
             res = chatbot.repeat()
         elif sentence == "revert":
             res = chatbot.revert_last_turn()
+            continue
         elif sentence == "exit":
             break
         else:
