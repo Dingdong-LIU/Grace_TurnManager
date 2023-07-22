@@ -79,20 +79,25 @@ class ProgressivePolicy:
         robot_turn = (state_dict["turn_ownership"]["val"] == 'robot_turn')
         human_speaking = (state_dict["human_speaking"]["val"] == "speaking")
         if robot_turn and human_speaking:
-            
             req = self.action_composer.stop_talking_action()
 
             # Immediately create a stop processing action for robot
             self.action_composer.publish_turn_yielding_signal()
 
             self.turn_segmenter.reconstruct_flag = True
+
             
             # Send a revert request to the chatbot
             self.revert_task = ThreadWithReturnValue(target=self.chatbot.revert_last_turn)
             self.revert_task.start()
 
-            # Discard the currently processing task
-            task_to_discard = self.processing_task_pool.get(block=False)
+            # Discard the currently processing task, if any
+            if not self.processing_task_pool.empty():
+                task_to_discard = self.processing_task_pool.get(block=False)
+            # set discard turn timestamp, human turn before this timestamp will be discarded
+            if self.turn_segmenter.last_human_turn: # omit the first turn barge-in
+                self.turn_segmenter.discard_turn = self.turn_segmenter.last_human_turn.create_time
+
             return req
 
         # Check if there is a finished turn processing result
@@ -101,13 +106,13 @@ class ProgressivePolicy:
         ## Maintain the running task pool
 
         # Get the oldest task in the queue, but don't remove it
-        oldest_task = None if self.processing_task_pool.empty() else self.processing_task_pool[0]
+        oldest_task = None if self.processing_task_pool.empty() else self.processing_task_pool.queue[0]
         # Check if this req need to be discarded. If it is, discard it
         # As turn construction is much slower than mainloop. We only process one task per loop.
         if oldest_task and oldest_task._args[0].create_time <= self.turn_segmenter.discard_turn:
             self.processing_task_pool.get(block=False)
 
-        oldest_task = None if self.processing_task_pool.empty() else self.processing_task_pool[0]
+        oldest_task = None if self.processing_task_pool.empty() else self.processing_task_pool.queue[0]
         if oldest_task and not oldest_task.is_alive():
             # If the task is finished, then get the result
             finished_task = self.processing_task_pool.get(block=False)
