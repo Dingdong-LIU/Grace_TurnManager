@@ -133,5 +133,5 @@ class ASR_Interim_Sentence:
             # update timeout
             timeout = (time.time() - start_waiting_time) > 1
         
-        self.logger.error("%s ASR timeout, return previous sentence %s", self.__class__.__name__, sentence)
+        self.logger.error("%s ASR timeout, return previous sentence '%s'", self.__class__.__name__, sentence)
         return sentence
