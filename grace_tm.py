@@ -77,7 +77,7 @@ class TurnManager:
         rospy.init_node(self.__config_data['TM']['Ros']['node_name'])
         self.__nh = True
 
-        self.__conv_alive_flag = False
+        self.__conv_alive_flag = not self.__config_data['TM']['Debug']['has_gui']
         self.__start_conv_sub = rospy.Subscriber(
                                     self.__config_data['Custom']['Flow']['topic_start_conv'],
                                     std_msgs.msg.Bool, 
@@ -256,7 +256,7 @@ class TurnManager:
         it_cnt = 0
 
         #Wait for trigger
-        while self.__config_data['TM']['Debug']['has_gui'] and (not self.__conv_alive_flag) :
+        while not self.__conv_alive_flag :
             rate.sleep()
 
 
