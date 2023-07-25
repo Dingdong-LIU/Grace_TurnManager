@@ -38,7 +38,7 @@ class Turn:
     """
     A turn is a combination of ASR input and emotion input.
     """
-    def __init__(self, ownership="robot_turn", asr_input_thread=None, emotion_input=None, attention_input=None, exiting_asr = "", reconstruct = False, time_stamp=0):
+    def __init__(self, ownership="robot_turn", asr_input_thread=None, emotion_input=None, attention_input=None, exiting_asr = "", reconstruct_flag = False, time_stamp=0):
         # sensor data for extraction
         self.asr_input = None
         self.asr_input_thread = asr_input_thread
@@ -48,13 +48,16 @@ class Turn:
 
         # redo construction flag
         self.exiting_asr = exiting_asr
-        self.reconstruct_flag = reconstruct
+        self.reconstruct_flag = reconstruct_flag
 
         # property data
         # could be "not_owned", "robot_turn", "human_turn"
         self.ownership = ownership
         # engagement level
         self.engagement_level = "undefined"
+
+        # ASR complete flag
+        self.asr_complete = False
 
     def get_engagement_level(self) -> Literal['undefined', 'agitated', 'distracted', 'engaged']:
         """
@@ -106,11 +109,17 @@ class Turn:
         Returns:
             str: ASR input
         """
-        asr = self.asr_input_thread.join()
+        asr, timeout = self.asr_input_thread.join()
+        if self.asr_complete:
+            return self.asr_input
         if self.reconstruct_flag:
-            self.asr_input = self.exiting_asr + '\n' + asr
+            if timeout:
+                self.asr_input = "please repeat"
+            else:
+                self.asr_input = self.exiting_asr + '\n' + asr
         else:
             self.asr_input = asr
+        self.asr_complete = True
         return self.asr_input
 
     def get_ownership(self):
@@ -237,7 +246,7 @@ class TurnSegmenter:
         attention_input = self.emotion_listener.get_attention()
         attention_input.extend(self.last_human_turn.get_attention())
         turn = Turn(
-            ownership=turn_ownership, time_stamp=time.time(), asr_input_thread=asr_input_thread, emotion_input=emotion_input, attention_input=attention_input, exiting_asr=exiting_asr, reconstruct=True
+            ownership=turn_ownership, time_stamp=time.time(), asr_input_thread=asr_input_thread, emotion_input=emotion_input, attention_input=attention_input, exiting_asr=exiting_asr, reconstruct_flag=True
         )
         # start wait for ASR input from human
         asr_input_thread.start()
@@ -296,13 +305,14 @@ class TurnSegmenter:
         
         # Consider a reconstruct when there is a barge in
         if self.reconstruct_flag:
+            # Note that resonstruct is processed. Set the flag to False
+            self.reconstruct_flag = False
             # For the first human turn, do not redo the turn
             if self.last_human_turn is None:
                 new_turn_object = self.construct_turn(turn_ownership=last_turn_ownership)
                 self.logger.warn("Tried to revert the first Human turn. Discard this action and construct a normal turn")
             else:
                 # Only redo turn when there is previous human turn
-                self.reconstruct_flag = False
                 new_turn_object = self.redo_human_turn(turn_ownership=last_turn_ownership)
         else:
             new_turn_object = self.construct_turn(turn_ownership=last_turn_ownership)
