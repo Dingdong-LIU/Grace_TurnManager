@@ -18,7 +18,7 @@ if __name__ == "__main__":
                     __name__,
                     os.path.join("./logs/log_") + datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S"))
     l.info("Start test_dialogflow.py")
-    chatbot = DialogflowConnector(link="https://44bb-143-89-145-170.ngrok-free.app")
+    chatbot = DialogflowConnector(link="https://68c7-143-89-145-170.ngrok-free.app")
     chatbot.debug_mode(enabled=False)
     action_composer = ActionComposer(config=loadGraceConfigs())
 
@@ -44,3 +44,5 @@ if __name__ == "__main__":
         utterance, params = action_composer.parse_reply_from_chatbot(res)
         req = action_composer.compose_req(command="exec", utterance=utterance, params=params)
         print(req)
+        if req["content"]["utterance"] == '冇問題, 我明白. 我會搵第個護士嚟幫手.':
+            exit(0)

@@ -55,7 +55,9 @@ import hr_msgs.srv
 import std_msgs
 
 
-
+def killSelf():
+    pid = os.getpid()
+    os.kill(pid)
 class TurnManager:
 
     def __init__(self, config_data):
@@ -75,6 +77,21 @@ class TurnManager:
         rospy.init_node(self.__config_data['TM']['Ros']['node_name'])
         self.__nh = True
 
+        self.__conv_trigger_flag = False
+        self.__start_conv_sub = rospy.Subscriber(
+                                    self.__config_data['Custom']['Flow']['topic_start_conv'],
+                                    std_msgs.msg.Bool, 
+                                    self.__startConvCallback, 
+                                    queue_size=self.__config_data['Custom']['Ros']['queue_size'])
+
+        self.__end_of_conv_sub = rospy.Subscriber(
+                                    self.__config_data['Custom']['Flow']['topic_stop_all'],
+                                    std_msgs.msg.Bool, 
+                                    self.__endOfConvCallback, 
+                                    queue_size=self.__config_data['Custom']['Ros']['queue_size'])
+
+
+
         # # Load sensor config
         # sensor_config_path = os.path.join(
         #     os.path.dirname(os.path.realpath(getsourcefile(lambda:0))), 
@@ -87,7 +104,6 @@ class TurnManager:
         # self.__grace_behav_client = rospy.ServiceProxy(
         #                                 self.__config_data['Custom']['Behavior']['grace_behavior_service'], 
         #                                 grace_attn_msgs.srv.GraceBehavior)
-        #Yifan note: use the right instance for the right functionality
         self.__gaze_behav_exec = Grace_Behav_Executor.grace_behav_exec.BehavExec(
                                         self.__config_data, False,
                                         Grace_Behav_Executor.grace_behav_exec.ExecFnc.GAZE)
@@ -126,6 +142,20 @@ class TurnManager:
             # Set the fake chatbot
             if self.__config_data["TM"]["Debug"].get("fake_chatbot", False):
                 self.__policy_progressive.set_fake_chatbot(self.__config_data["TM"]["Debug"]['fake_chatbot'])
+
+
+    def __startConvCallback(self, msg):
+        self.__conv_trigger_flag = True
+
+    def __endOfConvCallback(self, msg):
+        self.__speak_behav_exec.initiateBehaviorThread(
+            self.__composeBehavReq(
+                cmd = self.__config_data["BehavExec"]["General"]["comp_behav_exec_cmd"],
+                args= self.__config_data["BehavExec"]["CompositeBehavior"]["EndOfConv"]
+                ),
+            end_of_conv = True )
+        )
+        killSelf()
 
     def __initiateDialogue(self):
         #For progressive part, initialize turn and trigger first action
@@ -166,17 +196,23 @@ class TurnManager:
         if('prog_act' in decisions):
             #If there is, apply the speech action from prog part
 
-            #Debug
-            # self.__logger.info(decisions['prog_act'])
-
-
-            #Yifan note: decode the dict output and implement action execution command
             if decisions['prog_act'] is not None:
                 progressive_action = decisions['prog_act']
-                self.__speak_behav_exec.initiateBehaviorThread(self.__composeBehavReq(
-                    cmd=progressive_action['cmd'], args=progressive_action['content'])
+                self.__speak_behav_exec.initiateBehaviorThread(
+                    self.__composeBehavReq(
+                        cmd = progressive_action['cmd'], 
+                        args=progressive_action['content']
+                        ),
+                    end_of_conv = ('end_conversation' in progressive_action and progressive_action['end_conversation'] )
                 )
                 self.__logger.info("Speech: %s" % decisions['prog_act'])
+
+                if( 
+                    ('end_conversation' in progressive_action) 
+                     and progressive_action['end_conversation']
+                ):
+                    killSelf()
+
 
         else:
             #If no action from the progressive side, apply actions from the inst part (if any)
@@ -219,6 +255,11 @@ class TurnManager:
         #Setup main loop
         rate = rospy.Rate(self.__config_data['TM']['General']['main_freq'])
         it_cnt = 0
+
+        #Wait for trigger
+        while self.__config_data['TM']['Debug']['has_gui'] and (not self.__conv_trigger_flag) :
+            rate.sleep()
+
 
         #Initiate dialogue
         if(self.__config_data['TM']['Debug']['enable_prog_part']):

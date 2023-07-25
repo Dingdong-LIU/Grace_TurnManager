@@ -56,6 +56,7 @@ class ActionComposer:
             action_content = params
             action_content['utterance'] = utterance
             action_content['lang'] = self.lang
+            action_content['end_conversation'] = utterance == '冇問題, 我明白. 我會搵第個護士嚟幫手.'
         req = {
             "cmd": command,
             "content" : action_content
