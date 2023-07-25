@@ -77,7 +77,7 @@ class TurnManager:
         rospy.init_node(self.__config_data['TM']['Ros']['node_name'])
         self.__nh = True
 
-        self.__conv_trigger_flag = False
+        self.__conv_alive_flag = False
         self.__start_conv_sub = rospy.Subscriber(
                                     self.__config_data['Custom']['Flow']['topic_start_conv'],
                                     std_msgs.msg.Bool, 
@@ -145,16 +145,15 @@ class TurnManager:
 
 
     def __startConvCallback(self, msg):
-        self.__conv_trigger_flag = True
+        self.__conv_alive_flag = True
 
     def __endOfConvCallback(self, msg):
         self.__speak_behav_exec.initiateBehaviorThread(
             self.__composeBehavReq(
                 cmd = self.__config_data["BehavExec"]["General"]["comp_behav_exec_cmd"],
-                args= self.__config_data["BehavExec"]["CompositeBehavior"]["EndOfConv"]
+                args= self.__config_data["BehavExec"]["CompositeBehavior"]['Predefined']["EndOfConv"]
                 ),
             end_of_conv = True )
-        )
         killSelf()
 
     def __initiateDialogue(self):
@@ -257,7 +256,7 @@ class TurnManager:
         it_cnt = 0
 
         #Wait for trigger
-        while self.__config_data['TM']['Debug']['has_gui'] and (not self.__conv_trigger_flag) :
+        while self.__config_data['TM']['Debug']['has_gui'] and (not self.__conv_alive_flag) :
             rate.sleep()
 
 
@@ -266,7 +265,7 @@ class TurnManager:
             self.__initiateDialogue()
 
         #Enter tm main loop
-        while True:
+        while self.__conv_alive_flag:
 
             it_cnt = it_cnt + 1
             self.__logger.debug('[Iteration %.6d]' % it_cnt)
