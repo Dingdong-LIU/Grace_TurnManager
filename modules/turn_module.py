@@ -109,7 +109,12 @@ class Turn:
         Returns:
             str: ASR input
         """
-        asr, timeout = self.asr_input_thread.join()
+        #Yifan hot fix: seems to be incomplete - timeout field not returned, asr char can have concat bug
+        asr = str(self.asr_input_thread.join())
+        timeout = False
+        #asr, timeout = self.asr_input_thread.join()
+        
+        
         if self.asr_complete:
             return self.asr_input
         if self.reconstruct_flag:
