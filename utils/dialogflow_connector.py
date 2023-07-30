@@ -23,6 +23,9 @@ class DialogflowConnector:
         self.communicate = self.real_communicate
         self.call_count = 0
 
+        # Last utterance intent is used to revert the intent when barge in happens
+        self.last_utterance_intent = ""
+
     def debug_mode(self, enabled=False):
         if enabled:
             self.communicate = self.fake_response
@@ -52,6 +55,7 @@ class DialogflowConnector:
             )
             if response.status_code == 200:
                 self.logger.info("Received replies from chatbot: %s", str(response.json()))
+                self.last_utterance_intent = dict(response.json())["responses"]['intent']
                 return response.json()
 
             # If status code is not 200
@@ -114,8 +118,9 @@ class DialogflowConnector:
     # frequent barge-in
         # let go of this question if too much barge-in
     def revert_last_turn(self):
-        # TODO: check with Willy what is the exact behaviour of revert string
-        self.logger.info("Revert previous sentence with magic string: %s", self.revert_magic_string)
+        # TODO: check with Willy what is the exact behaviour of revert string, and how to use the revert intent
+        # self.last_utterance_intent
+        self.logger.info("Revert previous sentence with magic string and Intent: '%s', '%s'", self.revert_magic_string, self.last_utterance_intent)
         response = self.communicate(asr_text=self.revert_magic_string)
         return response
 
