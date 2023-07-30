@@ -147,7 +147,7 @@ class TurnManager:
     def __startConvCallback(self, msg):
         self.__conv_alive_flag = True
 
-    def __endOfConvCallback(self, msg):
+    def __endOfConvCallback(self, msg = None):
         self.__speak_behav_exec.initiateBehaviorThread(
             self.__composeBehavReq(
                 cmd = self.__config_data["BehavExec"]["General"]["comp_behav_exec_cmd"],

@@ -36,7 +36,7 @@ class DialogflowConnector:
     def test(self):
         print(self.session_id)
 
-    def real_communicate(self, asr_text):
+    def real_communicate(self, asr_text):            
         self.logger.info("Start to communicate with chatbot: %s" ,asr_text)
         empty_response = {
             "responses" : {
@@ -44,6 +44,9 @@ class DialogflowConnector:
                 "text" : ""
                 }
             }
+        if not asr_text or asr_text == "":
+            self.logger.error("Attempt to send a empty string to dialogflow, replace it with please repeat.")
+            return empty_response
         try:
             response = requests.post(
                 f"{self.NGROK_LINK}/dialogflow_result",
@@ -95,8 +98,8 @@ class DialogflowConnector:
         if asr_text == self.revert_magic_string:
             return {
                 "responses" : {
-                    "intent" : "",
-                    "text" : ""
+                    "intent" : self.revert_magic_string,
+                    "text" : self.revert_magic_string,
                     }
             }
         

@@ -38,7 +38,7 @@ class Turn:
     """
     A turn is a combination of ASR input and emotion input.
     """
-    def __init__(self, ownership="robot_turn", asr_input_thread=None, emotion_input=None, attention_input=None, exiting_asr = "", reconstruct_flag = False, time_stamp=0):
+    def __init__(self, ownership="robot_turn", asr_input_thread=None, emotion_input=None, attention_input=None, exiting_asr = "", current_turn_reconstruct_flag = False, time_stamp=0):
         # sensor data for extraction
         self.asr_input = None
         self.asr_input_thread = asr_input_thread
@@ -48,7 +48,7 @@ class Turn:
 
         # redo construction flag
         self.exiting_asr = exiting_asr
-        self.reconstruct_flag = reconstruct_flag
+        self.current_turn_reconstruct_flag = current_turn_reconstruct_flag
 
         # property data
         # could be "not_owned", "robot_turn", "human_turn"
@@ -75,7 +75,8 @@ class Turn:
         elif emotion in ["Anger", "Agitation"]:
             self.engagement_level = "agitated"
         elif attention == "False":
-            self.engagement_level = "distracted"
+            # self.engagement_level = "distracted"
+            self.engagement_level = "engaged"
         else:
             self.engagement_level = "engaged"
 
@@ -109,7 +110,7 @@ class Turn:
         Returns:
             str: ASR input
         """
-        # #Yifan hot fix: seems to be incomplete - timeout field not returned, asr char can have concat bug
+        #Yifan hot fix: seems to be incomplete - timeout field not returned, asr char can have concat bug
         # asr = str(self.asr_input_thread.join())
         # timeout = False
         (asr, timeout) = self.asr_input_thread.join()
@@ -117,7 +118,7 @@ class Turn:
         
         if self.asr_complete:
             return self.asr_input
-        if self.reconstruct_flag:
+        if self.current_turn_reconstruct_flag:
             if timeout:
                 self.asr_input = "please repeat"
             else:
@@ -177,7 +178,7 @@ class TurnSegmenter:
         self.last_turn_ownership = 0
 
         # Timeout (seconds) for a new turn
-        self.timeout = 5
+        self.timeout = 1
 
         # Turn action composer
         self.turn_action_composer = action_composer
@@ -196,7 +197,7 @@ class TurnSegmenter:
         Returns:
             _type_: _description_
         """
-        asr_input_thread = self.get_asr_input()
+        asr_input_thread = self.create_get_asr_input_thread()
         emotion_input = self.emotion_listener.get_emotion()
         attention_input = self.emotion_listener.get_attention()
         turn = Turn(
@@ -208,12 +209,13 @@ class TurnSegmenter:
             self.last_human_turn = turn
             # start to get human ASR when it is a human turn
             asr_input_thread.start()
+            self.logger.info("Newly constructed Thread '%s' start to activately listen for new asr input.", asr_input_thread.getName())
         
         self.logger.info("Construct a new '%s' turn: %s", turn_ownership, turn)
 
         return turn
 
-    def get_asr_input(self) -> ThreadWithReturnValue:
+    def create_get_asr_input_thread(self) -> ThreadWithReturnValue:
         """
         This function will return a ThreadWithReturnValue object that will get the ASR input. The ThreadWithReturnValue will return the asr input got when the thread.join() is called.
 
@@ -245,16 +247,20 @@ class TurnSegmenter:
         exiting_asr = self.last_human_turn.get_asr()
 
         # Construct a new turn object
-        asr_input_thread = self.get_asr_input()
+        asr_input_thread = self.create_get_asr_input_thread()
         emotion_input = self.emotion_listener.get_emotion()
         emotion_input.extend(self.last_human_turn.get_emotion())
         attention_input = self.emotion_listener.get_attention()
         attention_input.extend(self.last_human_turn.get_attention())
         turn = Turn(
-            ownership=turn_ownership, time_stamp=time.time(), asr_input_thread=asr_input_thread, emotion_input=emotion_input, attention_input=attention_input, exiting_asr=exiting_asr, reconstruct_flag=True
+            ownership=turn_ownership, time_stamp=time.time(), 
+            asr_input_thread=asr_input_thread, emotion_input=emotion_input, 
+            attention_input=attention_input, exiting_asr=exiting_asr, 
+            current_turn_reconstruct_flag=True
         )
         # start wait for ASR input from human
         asr_input_thread.start()
+        self.logger.info("Redoed human turn start actively listening, listening thread: %s", asr_input_thread.getName())
 
         # update last turn information
         self.last_human_turn = turn
@@ -280,45 +286,63 @@ class TurnSegmenter:
             self.logger.error("Current turn ownership is unknown")
             return None
 
-        # This is a bug. Should use the turn_ownership_meta["transition"] instead, because internal state maintainance is not realtime
-        # if current_turn_ownership == self.last_turn.get_ownership():
-        if not turn_ownership_meta.get("transition", False):
+        # Only construct a New Turn object when an Existing Turn Ends
+        # The current turn owner should be "not_owned"
+        if not (turn_ownership_meta.get("transition", False) and current_turn_ownership == "not_owned" ):
             # Do nothing if turn ownership does not change
             # Return None
             return None
-        # Construct a new turn object if turn ownership changes
-
-        # Debug info: if there is a transition and the self.last_turn_ownership is not the same as "from" in "turn_ownership"
-        if turn_ownership_meta.get("transition", False) and self.last_turn_ownership != turn_ownership_meta.get('from', 'unknown'):
-        # if turn_ownership_meta.get('transition', False):
-        # TODO: check self.last_turn == None
-            self.logger.error(
-                "last_turn_ownership: '%s' is not the same as turn transition info '%s'",
-                self.last_turn_ownership, turn_ownership_meta.get('from', 'unknown')
-            )
-
         
-        # Turn object is constructed at the end of a turn, so the ownership is last turn ownership
+        # Debug info: if there is a transition and the self.last_turn_ownership is not the same as "from" in "turn_ownership"
+        # if turn_ownership_meta.get("transition", False) and self.last_turn_ownership != turn_ownership_meta.get('from', 'unknown'):
+        # # if turn_ownership_meta.get('transition', False):
+        #     self.logger.error(
+        #         "last_turn_ownership: '%s' is not the same as turn transition info '%s'",
+        #         self.last_turn_ownership, turn_ownership_meta.get('from', 'unknown')
+        #     )
+
         last_turn_ownership = turn_ownership_meta.get("from", "unknown")
+        # There are three cases: 
+        # When barge-in flag is not set; create normal turns
+        if not self.reconstruct_flag:
+            # Turn object is constructed at the end of a turn, so the ownership is last turn ownership
+            new_turn_object = self.construct_turn(turn_ownership=last_turn_ownership)
+            return new_turn_object
+        else:
+            # This time a reconstruct flag is set.
+            # When barge-in flag is set. 
+            # If just passed turn is robot turn, 
+            # create robot turn but do not reset flag
+            if last_turn_ownership == "robot_turn":
+                new_turn_object = self.construct_turn(turn_ownership=last_turn_ownership)
+                return new_turn_object
+            elif last_turn_ownership == "human_turn":
+                new_turn_object = self.redo_human_turn(turn_ownership=last_turn_ownership)
+                self.reconstruct_flag = False
+                return new_turn_object
+        self.logger.fatal("Cannot construct a Turn object, Fatal")
+        return None
+        
+        
 
         # Consider a mis-segmentation if the time span is too short and now it is a human's turn
-        if self.last_human_turn and current_turn_ownership == "human_turn" and time.time() - self.last_turn.get_timestamp() < self.timeout:
-            # Mis-segmentation happens
-            # Indicate there is a need to redo the last human turn
-            self.reconstruct_flag = True
-            self.logger.warn("Potential mis-segmentation as time span is too short and now it is a human's turn")
+        # if self.last_human_turn and current_turn_ownership == "human_turn" and time.time() - self.last_turn.get_timestamp() < self.timeout:
+        #     # Mis-segmentation happens
+        #     # Indicate there is a need to redo the last human turn
+        #     self.reconstruct_flag = True
+        #     self.logger.warn("Potential mis-segmentation as time span is too short and now it is a human's turn")
         
         # Consider a reconstruct when there is a barge in
-        if self.reconstruct_flag:
-            # Note that resonstruct is processed. Set the flag to False
-            self.reconstruct_flag = False
-            # For the first human turn, do not redo the turn
-            if self.last_human_turn is None:
-                new_turn_object = self.construct_turn(turn_ownership=last_turn_ownership)
-                self.logger.warn("Tried to revert the first Human turn. Discard this action and construct a normal turn")
-            else:
-                # Only redo turn when there is previous human turn
-                new_turn_object = self.redo_human_turn(turn_ownership=last_turn_ownership)
-        else:
-            new_turn_object = self.construct_turn(turn_ownership=last_turn_ownership)
-        return new_turn_object
+        # if self.reconstruct_flag:
+        #     # Note that resonstruct is processed. Set the flag to False
+        #     self.reconstruct_flag = False
+        #     # For the first human turn, do not redo the turn
+        #     if self.last_human_turn is None:
+        #         new_turn_object = self.construct_turn(turn_ownership=last_turn_ownership)
+        #         self.logger.warn("Tried to revert the first Human turn. Discard this action and construct a normal turn")
+        #     else:
+        #         # Only redo turn when there is previous human turn
+        #         new_turn_object = self.redo_human_turn(turn_ownership=last_turn_ownership)
+        # else:
+        #     new_turn_object = self.construct_turn(turn_ownership=last_turn_ownership)
+        # return new_turn_object

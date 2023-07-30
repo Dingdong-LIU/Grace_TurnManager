@@ -129,9 +129,9 @@ class ASR_Interim_Sentence:
         while not timeout:
             wait, sentence = self.get_full_sentence()
             if not wait:
-                return sentence
+                return (sentence, timeout)
             # update timeout
             timeout = (time.time() - start_waiting_time) > 1
         if timeout:
             self.logger.error("%s ASR timeout, return previous sentence '%s'", self.__class__.__name__, sentence)
-        return sentence, timeout
+        return (sentence, timeout)

@@ -4,7 +4,7 @@ import time
 
 # Set the log format and level using basicConfig
 logging.basicConfig(
-    format='%(asctime)s.%(msecs)03d | %(name)s | %(levelname)s | %(message)s |',
+    format='%(asctime)s.%(msecs)03d | %(name)s | %(levelname)s | %(threadName)s | %(message)s |',
     datefmt='%m-%d-%Y %H:%M:%S',
     level=logging.DEBUG
 )
@@ -21,7 +21,7 @@ console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.DEBUG)
 
 # Create a formatter for both console and file
-formatter = logging.Formatter('%(asctime)s.%(msecs)03d | %(name)s | %(levelname)s | %(message)s |', datefmt='%m-%d-%Y %H:%M:%S')
+formatter = logging.Formatter('%(asctime)s.%(msecs)03d | %(name)s | %(levelname)s | %(threadName)s | %(message)s |', datefmt='%m-%d-%Y %H:%M:%S')
 
 # Set the formatter for the file handler
 file_handler.setFormatter(formatter)

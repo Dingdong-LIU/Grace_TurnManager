@@ -48,7 +48,11 @@ class ActionComposer:
 
         Returns:
             dict: a request dict with "cmd" and "content" field
-        """        
+        """
+        # When there is a database lookup error happens. This should be an comp_exec command but without valid utterance or params
+        if command == "comp_exec" and (utterance == "" or params is None):
+            return None
+
         if utterance=="" and params is None:
             # when compose a stop action, params is None and utterance is empty
             action_content = None
