@@ -197,6 +197,7 @@ class TurnManager:
 
             if decisions['prog_act'] is not None:
                 progressive_action = decisions['prog_act']
+                self.__logger.info(progressive_action)
                 self.__speak_behav_exec.initiateBehaviorThread(
                     self.__composeBehavReq(
                         cmd = progressive_action['cmd'], 
