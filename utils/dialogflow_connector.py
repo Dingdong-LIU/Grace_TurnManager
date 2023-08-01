@@ -25,6 +25,7 @@ class DialogflowConnector:
 
         # Last utterance intent is used to revert the intent when barge in happens
         self.last_utterance_intent = ""
+        self.consecutive_revert_flag = False
 
     def debug_mode(self, enabled=False):
         if enabled:
@@ -121,8 +122,9 @@ class DialogflowConnector:
     # frequent barge-in
         # let go of this question if too much barge-in
     def revert_last_turn(self):
-        # TODO: check with Willy what is the exact behaviour of revert string, and how to use the revert intent
-        # self.last_utterance_intent
+        if self.consecutive_revert_flag:
+            return
+        self.consecutive_revert_flag = True
         self.logger.info("Revert previous sentence with magic string and Intent: '%s', '%s'", self.revert_magic_string, self.last_utterance_intent)
         response = self.communicate(asr_text=self.revert_magic_string)
         return response
@@ -145,3 +147,8 @@ class DialogflowConnector:
             "Repeat with magic string: %s", self.repeat_magic_string
         )
         return self.communicate(asr_text=self.repeat_magic_string)
+
+    def normal_communicate(self, patient_sentence:str):
+        res = self.communicate(patient_sentence)
+        self.consecutive_revert_flag = False
+        return res

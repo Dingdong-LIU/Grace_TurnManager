@@ -60,7 +60,7 @@ class ProgressivePolicy:
         else:
             # get user's sentence from the turn object
             user_utterance = turn.get_asr() # This function may need some time to execute
-            res = self.chatbot.communicate(user_utterance)
+            res = self.chatbot.normal_communicate(user_utterance)
             utterance, params = self.action_composer.parse_reply_from_chatbot(res)
             req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
 
