@@ -310,6 +310,13 @@ class TurnSegmenter:
             return new_turn_object
         else:
             # This time a reconstruct flag is set.
+
+            # Special case for the initial greeting turn, it is not possible to reconstruct a turn
+            if self.last_turn is None or self.last_human_turn is None:
+                new_turn_object = self.construct_turn(turn_ownership=last_turn_ownership)
+                self.reconstruct_flag = False
+                return new_turn_object
+
             # When barge-in flag is set. 
             # If just passed turn is robot turn, 
             # create robot turn but do not reset flag
