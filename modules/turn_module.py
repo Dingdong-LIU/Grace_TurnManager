@@ -119,13 +119,17 @@ class Turn:
         if self.asr_complete:
             return self.asr_input
         if self.current_turn_reconstruct_flag:
-            if timeout:
-                self.asr_input = "please repeat"
-            else:
-                self.asr_input = self.exiting_asr + '\n' + asr
+            # if timeout:
+            #     self.asr_input = "please repeat"
+            # else:
+            #     self.asr_input = self.exiting_asr + '\n' + asr
+            self.asr_input = self.exiting_asr + '\n' + asr
         else:
             self.asr_input = asr
         self.asr_complete = True
+        if timeout:
+            # TODO: add a magic string - "There is a barge-in but I didn't heard anything"
+            return "please repeat"
         return self.asr_input
 
     def get_ownership(self):
