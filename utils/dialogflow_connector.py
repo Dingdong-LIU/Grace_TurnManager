@@ -15,7 +15,7 @@ class DialogflowConnector:
         self.session_id = random.randint(10000000, 500000000)
         self.logger = logging.getLogger(__name__)
 
-        self.revert_magic_string = "revert previous intnt due to barge in"
+        self.revert_magic_string = "revert previous intent due to barge in"
         self.start_conversation_magic_string = "This is a magic phrase to initialize grace agent to welcome intent."
         self.gracefully_end_magic_string = "gracefully exit the interaction."
         self.repeat_magic_string = "please repeat"
