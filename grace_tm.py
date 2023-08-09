@@ -276,6 +276,7 @@ class TurnManager:
                 #We initialize after dialogue initiation so that the timestamp in the state is more accurate
                 #Note that the instantaneous state monitor assumes that the dialogue starts in robot's turn
                 self.__state_monitor_inst.initializeState()
+                self.__state_monitor_inst.initVAD();
             else:
                 #Update instantaneous states
                 self.__state_monitor_inst.updateState()
