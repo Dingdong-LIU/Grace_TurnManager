@@ -218,8 +218,8 @@ class TurnManager:
             #If no action from the progressive side, apply actions from the inst part (if any)
             nodding_action = decisions['inst_act']['bc_action']['nodding']
             if(nodding_action != None):
-                self.__nod_behav_exec.initiateBehaviorThread(self.__composeBehavReq(nodding_action))
-                self.__logger.info('Nodding: %s' % nodding_action)
+                self.__nod_behav_exec.initiateBehaviorThread(self.__composeBehavReq(nodding_action['cmd'],args=nodding_action['args']))
+                self.__logger.info('Nodding: %s' % nodding_action['cmd'])
 
             humming_action = decisions['inst_act']['bc_action']['hum']
             if(humming_action != None):
@@ -230,8 +230,9 @@ class TurnManager:
         req = grace_attn_msgs.srv.GraceBehaviorRequest()
         
         req.command = cmd
-
-        if(req.command == self.__config_data['BehavExec']['General']['comp_behav_exec_cmd']
+        if(req.command == self.__config_data['BehavExec']['General']['nod_cmd']):
+            req.utterance = args['nod_mode']
+        elif(req.command == self.__config_data['BehavExec']['General']['comp_behav_exec_cmd']
             or
            req.command == self.__config_data['BehavExec']['General']['hum_behav_exec_cmd']):
 
