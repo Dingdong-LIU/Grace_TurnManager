@@ -32,7 +32,7 @@ class ProgressivePolicy:
         self.revert_task = None # only for debugging purpose
         self.__logger = logging.getLogger(__name__)
 
-        
+        self.handle_barge_in = config["TM"]["Debug"]["enable_barge_in"]
     
     def set_fake_chatbot(self, use_fake_chatbot):
         self.chatbot.debug_mode(enabled=use_fake_chatbot)
@@ -80,7 +80,7 @@ class ProgressivePolicy:
         # Immediately let robot to stop and hand over the turn ownership
         robot_turn = (state_dict["turn_ownership"]["val"] == 'robot_turn')
         human_speaking = (state_dict["human_speaking"]["val"] == "speaking")
-        if robot_turn and human_speaking:
+        if self.handle_barge_in and robot_turn and human_speaking:
             req = self.action_composer.stop_talking_action()
 
             # Immediately create a stop processing action for robot
