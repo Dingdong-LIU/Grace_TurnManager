@@ -53,7 +53,9 @@ class DialogflowConnector:
                 f"{self.NGROK_LINK}/dialogflow_result",
                 json={
                     "text": asr_text,
-                    "session_id": self.session_id
+                    "session_id": self.session_id,
+                    "message_list": asr_text.split("\n"),
+                    "redo": len(asr_text.split("\n"))>1,
                 },
                 timeout=3,
             )
