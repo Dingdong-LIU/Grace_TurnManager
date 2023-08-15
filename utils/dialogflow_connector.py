@@ -57,7 +57,6 @@ class DialogflowConnector:
                     "message_list": asr_text.split("\n"),
                     "redo": len(asr_text.split("\n"))>1,
                 },
-                timeout=3,
             )
             if response.status_code == 200:
                 self.logger.info("Received replies from chatbot: %s", str(response.json()))
