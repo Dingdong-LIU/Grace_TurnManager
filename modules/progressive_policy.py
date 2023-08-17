@@ -34,6 +34,7 @@ class ProgressivePolicy:
         self.__logger = logging.getLogger(__name__)
 
         self.handle_barge_in = config["TM"]["Debug"]["enable_barge_in"]
+        self.__config = config
     
     def set_fake_chatbot(self, use_fake_chatbot):
         self.chatbot.debug_mode(enabled=use_fake_chatbot)
@@ -78,6 +79,21 @@ class ProgressivePolicy:
 
 
     def applyPolicy(self, state_dict):
+
+        # Handle agitation voting
+        # If the agitation is too high, then ask the robot to gracefully end
+        agitation = self.turn_segmenter.emotion_listener.vote_agitation(
+            agitation_threshold=self.__config["TM"]["Emotion"]['agitation_threshold'],
+            agitation_length=self.__config["TM"]["Emotion"]['consecutive_agitation_length']*self.__config["TM"]["Emotion"]['frequency'],
+        )
+        if agitation:
+            self.__logger.warning("Ask robot to gracefully end due to agitation of patient. This is an agitation voting result from emotion recognition module.")
+            res = self.chatbot.gracefully_end()
+            utterance, params = self.action_composer.parse_reply_from_chatbot(res)
+            req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
+            return req
+
+
         # Yield the robot's turn if robot finish talking
         robot_speaking_meta = state_dict['robot_speaking']
         if robot_speaking_meta['val'] == "not_speaking" and robot_speaking_meta["transition"]:

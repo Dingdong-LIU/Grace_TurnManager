@@ -132,7 +132,7 @@ class TurnManager:
             # asr_listener = ASR_Word_Stream(self.__config_data["HR"])
             asr_listener = ASR_Interim_Sentence(self.__config_data["HR"])
             # Start the vision module
-            emotion_listener = FE_Connector(self.__config_data["Custom"])
+            emotion_listener = FE_Connector(subscriber_configs=self.__config_data["Custom"], emotion_configs=self.__config_data["TM"])
             # Start the policy
             self.__policy_progressive = ProgressivePolicy(
                 asr_listener=asr_listener,

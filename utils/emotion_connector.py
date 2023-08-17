@@ -6,15 +6,15 @@ class FE_Connector:
     """
     This class is a ROS subscriber to the emotion recognition topic. It will store the emotion and attention data in a deque.
     """
-    def __init__(self, args) -> None:
+    def __init__(self, subscriber_configs:dict, emotion_configs:dict) -> None:
         #rospy.init_node("emotion_recognition_node")
         self.emotion_sub = rospy.Subscriber(
-            args["Perception"]["topic_emotion_attention_state_estimation"],
+            subscriber_configs["Perception"]["topic_emotion_attention_state_estimation"],
             grace_attn_msgs.msg.EmotionAttentionResult,
             callback=self.callback,
             queue_size=100
         )
-        self.debug_queue_length = 50
+        self.debug_queue_length = emotion_configs["Emotion"]["frequency"]*emotion_configs["Emotion"]["time_window"]
         self.attention = deque([""]*self.debug_queue_length, maxlen=self.debug_queue_length)
         self.emotion = deque([""]*self.debug_queue_length, maxlen=self.debug_queue_length)
         self.visualization_frame = None # This one is of no use, so not updated
@@ -65,3 +65,22 @@ class FE_Connector:
             deque[str]: A deque of emotion signal. {'Anger', 'Contempt', 'Agitation' ('Disgust', 'Fear'), 'Happiness', 'Neutral', 'Sadness', 'Surprise', "Abscence"(no face), "EXCEPTION!!"(didn't track patient)}
         """
         return self.emotion
+    
+    def vote_agitation(self, agitation_threshold=0.5, agitation_length=30):
+        """Vote the agitation signal from emotion recognition subscriber. Using two criterion:
+        1. If "Agitation" exceeds a limit, then return Ture
+        2. If there is a consecutive "Agitation" signal for a certain length, then return True
+        """
+        # check criterion 1
+        if (self.emotion.count("Agitation") + self.emotion.count('Anger'))/len(self.emotion) > agitation_threshold:
+            return True
+        # check criterion 2
+        consceutive_agitation = 0
+        for i, emotion in enumerate(self.emotion):
+            if emotion == "Agitation" or emotion == "Anger":
+                consceutive_agitation += 1
+            else:
+                consceutive_agitation = 0
+            if consceutive_agitation > agitation_length:
+                return True
+        return False
