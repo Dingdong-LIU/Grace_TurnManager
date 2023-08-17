@@ -159,7 +159,8 @@ class TurnSegmenter:
             self, 
             asr_listener: Union[ASR_Word_Stream, ASR_Interim_Sentence], 
             emotion_listener:FE_Connector,
-            action_composer: ActionComposer
+            action_composer: ActionComposer,
+            config:dict = None
         ):
         # Class functions
         # self.frequency = frequency
@@ -195,7 +196,7 @@ class TurnSegmenter:
 
         # no owned timestamp & time out
         self.not_owned_start_time = None
-        self.no_response_timeout = 10
+        self.no_response_timeout = config["Debug"]["silence_timeout"] if config["Debug"]["silence_timeout"] else 10
 
     def construct_turn(self, turn_ownership:str):
         # TODO: solve the timing issue: if the turn is constructed too early, the asr input will be empty. How to choose between the asr sentence stream and the asr word stream?

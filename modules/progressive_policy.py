@@ -23,7 +23,8 @@ class ProgressivePolicy:
         self.turn_segmenter = TurnSegmenter(
             asr_listener=asr_listener,
             emotion_listener=emotion_listener,
-            action_composer= self.action_composer
+            action_composer= self.action_composer,
+            config=config["TM"]
         )
 
         # self.processing_task = None

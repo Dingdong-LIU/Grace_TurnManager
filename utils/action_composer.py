@@ -64,7 +64,7 @@ class ActionComposer:
         req = {
             "cmd": command,
             "content" : action_content,
-            "end_conversation": action_content['end_conversation']
+            "end_conversation": action_content.get("end_conversation", False) if action_content else False
         }
         return req
 
