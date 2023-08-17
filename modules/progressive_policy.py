@@ -37,6 +37,14 @@ class ProgressivePolicy:
     def set_fake_chatbot(self, use_fake_chatbot):
         self.chatbot.debug_mode(enabled=use_fake_chatbot)
     
+    def process_longlong_not_owned_turn(self, turn: Turn):
+        self.action_composer.publish_turn_taking_signal()
+        self.__logger.warning("Human stop speaking for too long, need gracefully end")
+        res = self.chatbot.gracefully_end()
+        utterance, params = self.action_composer.parse_reply_from_chatbot(res)
+        req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
+        return req
+
     def process_human_turn(self, turn:Turn) -> grace_attn_msgs.srv.GraceBehaviorRequest:
         # indicate robot wants to take turn
         self.action_composer.publish_turn_taking_signal()
@@ -125,6 +133,12 @@ class ProgressivePolicy:
         # If this is exact a transition time, a turn object is created
         # Otherwise None is returned
         turn = self.turn_segmenter.update_turn_information(state_dict)
+
+        # check if there is a too long not owned turn
+        if turn and turn.get_ownership() == "longlong_not_owned":
+            req = self.process_longlong_not_owned_turn(turn)
+            return req
+
 
         # if turn object is not none and it is not a reconstructed turn, then there is a turn need to be processed
         if turn and turn.get_ownership() == "human_turn": 

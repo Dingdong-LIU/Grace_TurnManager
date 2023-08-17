@@ -193,6 +193,10 @@ class TurnSegmenter:
         # discard turn time
         self.discard_turn = 0
 
+        # no owned timestamp & time out
+        self.not_owned_start_time = None
+        self.no_response_timeout = 10
+
     def construct_turn(self, turn_ownership:str):
         # TODO: solve the timing issue: if the turn is constructed too early, the asr input will be empty. How to choose between the asr sentence stream and the asr word stream?
         """
@@ -289,6 +293,20 @@ class TurnSegmenter:
         if current_turn_ownership == "unknown":
             self.logger.error("Current turn ownership is unknown")
             return None
+
+        # Check if we have a too long timeout, if so, we need to do something, say, construct a not_owned turn
+        # the only case for too long timeout is: human didn't response for long
+        # because robot will automatically end its turn and wait for human to take turn --> this is the case to check
+        # but when human finishes, robot will take turn immediately
+        current_time = time.time()
+        enter_state_time = turn_ownership_meta.get("stamp", None)
+        if turn_ownership_meta.get("val", "unknown") == "not_owned" and enter_state_time and current_time-enter_state_time > self.no_response_timeout:
+            # construct a long not_owned turn object
+            new_turn_object = Turn(ownership="longlong_not_owned")
+            return new_turn_object
+            
+
+
 
         # Only construct a New Turn object when an Existing Turn Ends
         # The current turn owner should be "not_owned"

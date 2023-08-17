@@ -63,7 +63,8 @@ class ActionComposer:
             action_content['end_conversation'] = utterance == '冇問題, 我明白. 我會搵第個護士嚟幫手.'
         req = {
             "cmd": command,
-            "content" : action_content
+            "content" : action_content,
+            "end_conversation": action_content['end_conversation']
         }
         return req
 
