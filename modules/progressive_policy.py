@@ -54,7 +54,7 @@ class ProgressivePolicy:
         engagement_level = turn.get_engagement_level()
         # Gracefully end the conversation if the engagement level is "agitated"
         if engagement_level == "agitated":
-            self.__logger.warning("Ask robot to repeat due to agitation of patient")
+            self.__logger.warning("Ask robot to gracefully end due to agitation of patient")
             res = self.chatbot.gracefully_end()
             utterance, params = self.action_composer.parse_reply_from_chatbot(res)
             req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
