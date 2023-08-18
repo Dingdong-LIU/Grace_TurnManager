@@ -84,7 +84,7 @@ class ProgressivePolicy:
         # If the agitation is too high, then ask the robot to gracefully end
         agitation = self.turn_segmenter.emotion_listener.vote_agitation(
             agitation_threshold=self.__config["TM"]["Emotion"]['agitation_threshold'],
-            agitation_length=self.__config["TM"]["Emotion"]['consecutive_agitation_length']*self.__config["TM"]["Emotion"]['frequency'],
+            agitation_length=self.__config["TM"]["Emotion"]['consecutive_agitation_time']*self.__config["TM"]["Emotion"]['frequency'],
         )
         if agitation:
             self.__logger.warning("Ask robot to gracefully end due to agitation of patient. This is an agitation voting result from emotion recognition module.")
