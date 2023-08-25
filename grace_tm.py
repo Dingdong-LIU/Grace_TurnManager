@@ -213,8 +213,7 @@ class TurnManager:
                 ):
                     killSelf()
 
-
-        else:
+        elif( decisions['inst_act']['bc_action'] != None ):
             #If no action from the progressive side, apply actions from the inst part (if any)
             nodding_action = decisions['inst_act']['bc_action']['nodding']
             if(nodding_action != None):
@@ -225,6 +224,10 @@ class TurnManager:
             if(humming_action != None):
                 self.__hum_behav_exec.initiateBehaviorThread(self.__composeBehavReq(humming_action['cmd'],humming_action['content']))
                 self.__logger.info('Humming: %s' % humming_action['cmd'])
+        
+        else:
+            self.__logger.debug('No action to take.')
+
 
     def __composeBehavReq(self, cmd, args = None):
         req = grace_attn_msgs.srv.GraceBehaviorRequest()
