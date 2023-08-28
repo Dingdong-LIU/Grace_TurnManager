@@ -39,8 +39,9 @@ class ActionComposer:
             params = None
 
         try:
-            annotation = self.cantonese_annotator.lookup_annotation(utterance)
+            annotation = self.cantonese_annotator.fuzz_lookup_annotation(utterance)
             utterance = annotation
+            print("+++++++++++++\n\n\n",annotation, "\n\n\n+++++")
         except Exception as e:
             self.logger.error("Unable to find the Cantonese Annotation for the utterance %s", intent. e, exc_info=True)
         return (utterance, params)
