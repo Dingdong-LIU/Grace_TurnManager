@@ -5,6 +5,7 @@ import rospy
 
 import logging
 from utils.database_reader import database_reader
+from utils.cantonese_annotator import Cantonese_Annotator
 
 
 class ActionComposer:
@@ -20,6 +21,7 @@ class ActionComposer:
         self.lang = config["BehavExec"]["TTS"]["tts_language_code"]
         self.logger = logging.getLogger(__name__)
         self.__config = config
+        self.cantonese_annotator = Cantonese_Annotator()
 
         self.turn_action_publisher = rospy.Publisher(
                                         self.__config['Custom']['TM']['turn_action_topic'], 
@@ -35,6 +37,12 @@ class ActionComposer:
         except Exception as e:
             self.logger.error("Unable to find corresponding action params for intent %s", intent, e, exc_info=True)
             params = None
+
+        try:
+            annotation = self.cantonese_annotator.lookup_annotation(utterance)
+            utterance = annotation
+        except Exception as e:
+            self.logger.error("Unable to find the Cantonese Annotation for the utterance %s", intent. e, exc_info=True)
         return (utterance, params)
 
     def compose_req(self, command:str, utterance:str, params:dict) -> dict:
