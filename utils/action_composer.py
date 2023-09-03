@@ -34,6 +34,7 @@ class ActionComposer:
         # Incase there is no corresponding entry in table
         try:
             params = self.database_reader.lookup_table(intent_name=intent)
+            params["intent"] = intent
         except Exception as e:
             self.logger.error("Unable to find corresponding action params for intent %s", intent, e, exc_info=True)
             params = None
@@ -69,7 +70,15 @@ class ActionComposer:
             action_content = params
             action_content['utterance'] = utterance
             action_content['lang'] = self.lang
-            action_content['end_conversation'] = utterance == '冇問題, 我明白. 我會搵第個護士嚟幫手.'
+            action_content['end_conversation'] = False
+            if utterance == '冇問題, 我明白. 我會搵第個護士嚟幫手.':
+                action_content['end_conversation'] = True
+            else:
+                intent = params.get('intent', None)
+                if intent and intent in ["(Q10.Skip) Repeat Address - Reach max limit", "(Q10.Success) Repeat Address", "(Special) Gracefully exit", "(Special) Emergency"]:
+                    action_content['end_conversation'] = True
+        
+        
         req = {
             "cmd": command,
             "content" : action_content,
