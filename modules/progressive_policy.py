@@ -142,6 +142,9 @@ class ProgressivePolicy:
             discard_obj = None
             if oldest_task and oldest_task._args[0].create_time <= self.turn_segmenter.discard_turn:
                 discard_obj = self.processing_task_pool.get(block=False)
+                # empty the queue
+                while not self.processing_task_pool.empty():
+                    self.processing_task_pool.get(block=False)
             if discard_obj:
                 def complex_revert(discard_obj, revert_obj):
                     discard_obj.join()
