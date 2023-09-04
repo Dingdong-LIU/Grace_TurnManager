@@ -116,8 +116,8 @@ class ProgressivePolicy:
             self.turn_segmenter.reconstruct_flag = True
 
             # Discard the currently processing task, if any
-            if not self.processing_task_pool.empty():
-                task_to_discard = self.processing_task_pool.get(block=False)
+            # if not self.processing_task_pool.empty():
+            #     task_to_discard = self.processing_task_pool.get(block=False)
 
             
             if self.turn_segmenter.last_human_turn: # omit the first turn barge-in
@@ -149,7 +149,7 @@ class ProgressivePolicy:
                 self.revert_task = ThreadWithReturnValue(target=complex_revert, args=(discard_obj, self.chatbot.revert_last_turn))
             else:
                 self.revert_task = ThreadWithReturnValue(target=self.chatbot.revert_last_turn)
-                self.revert_task.start()
+            self.revert_task.start()
             
             self.need_revert = False
             
