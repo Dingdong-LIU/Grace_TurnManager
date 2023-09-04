@@ -35,6 +35,8 @@ class ProgressivePolicy:
 
         self.handle_barge_in = config["TM"]["Debug"]["enable_barge_in"]
         self.__config = config
+
+        self.need_revert = False
     
     def set_fake_chatbot(self, use_fake_chatbot):
         self.chatbot.debug_mode(enabled=use_fake_chatbot)
@@ -122,8 +124,9 @@ class ProgressivePolicy:
                 # set discard turn timestamp, human turn before this timestamp will be discarded
                 self.turn_segmenter.discard_turn = self.turn_segmenter.last_human_turn.create_time
                 # Send a revert request to the chatbot, if this is not the first turn
-                self.revert_task = ThreadWithReturnValue(target=self.chatbot.revert_last_turn)
-                self.revert_task.start()
+                # self.revert_task = ThreadWithReturnValue(target=self.chatbot.revert_last_turn)
+                # self.revert_task.start()
+                self.need_revert = True
             return req
 
         # Check if there is a finished turn processing result
@@ -135,8 +138,21 @@ class ProgressivePolicy:
         oldest_task = None if self.processing_task_pool.empty() else self.processing_task_pool.queue[0]
         # Check if this req need to be discarded. If it is, discard it
         # As turn construction is much slower than mainloop. We only process one task per loop.
-        if oldest_task and oldest_task._args[0].create_time <= self.turn_segmenter.discard_turn:
-            self.processing_task_pool.get(block=False)
+        if self.need_revert:
+            discard_obj = None
+            if oldest_task and oldest_task._args[0].create_time <= self.turn_segmenter.discard_turn:
+                discard_obj = self.processing_task_pool.get(block=False)
+            if discard_obj:
+                def complex_revert(discard_obj, revert_obj):
+                    discard_obj.join()
+                    revert_obj()
+                self.revert_task = ThreadWithReturnValue(target=complex_revert, args=(discard_obj, self.chatbot.revert_last_turn))
+            else:
+                self.revert_task = ThreadWithReturnValue(target=self.chatbot.revert_last_turn)
+                self.revert_task.start()
+            
+            self.need_revert = False
+            
 
         oldest_task = None if self.processing_task_pool.empty() else self.processing_task_pool.queue[0]
         if oldest_task and not oldest_task.is_alive():
