@@ -45,12 +45,12 @@ class ProgressivePolicy:
                                         std_msgs.msg.Bool,
                                         self.__robot_speech_fin_callback,
                                         queue_size=config['Custom']['Ros']['queue_size'])
-        self.__enable_revert_blck = config["TM"]["Debug"]['enable_revert_block']
+        # self.__enable_revert_blck = config["TM"]["Debug"]['enable_revert_block']
 
     def __robot_speech_fin_callback(self,msg):
-        if(self.pending_robot_speech_finish_after_revert and msg.data):
+        if(msg.data):
             #if a speech finished normaliy while pending the speech finish flag
-            self.pending_robot_speech_finish_after_revert = False
+            self.chatbot.consecutive_revert_flag = False
 
     def set_fake_chatbot(self, use_fake_chatbot):
         self.chatbot.debug_mode(enabled=use_fake_chatbot)
@@ -136,9 +136,7 @@ class ProgressivePolicy:
             
             # no revert in the first turn
             # no revert if just reverted and no complete speech delivered yet
-            if self.turn_segmenter.last_human_turn and (
-                (not self.pending_robot_speech_finish_after_revert)
-                or (not self.__enable_revert_blck) ): 
+            if self.turn_segmenter.last_human_turn: 
                 # set discard turn timestamp, human turn before this timestamp will be discarded
                 self.turn_segmenter.discard_turn = self.turn_segmenter.last_human_turn.create_time
                 # Send a revert request to the chatbot, if this is not the first turn
@@ -149,8 +147,8 @@ class ProgressivePolicy:
 
                 #Start to pending a speech finish flag upon first revert
                 #even with the post-poned revert system it is safe to sete the flag here already
-                self.pending_robot_speech_finish_after_revert = True
-                self.__logger.info('**** REVERT COMMAND ISSUED ****')
+                # self.pending_robot_speech_finish_after_revert = True
+                # self.chatbot.consecutive_revert_flag = True
 
             return req
 

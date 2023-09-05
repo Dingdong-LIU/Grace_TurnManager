@@ -124,6 +124,7 @@ class DialogflowConnector:
         # let go of this question if too much barge-in
     def revert_last_turn(self):
         if self.consecutive_revert_flag:
+            self.logger.info('REVERT COMMAND SKIPPED')
             return
         self.consecutive_revert_flag = True
         self.logger.info("Revert previous sentence with magic string and Intent: '%s', '%s'", self.revert_magic_string, self.last_utterance_intent)
@@ -151,5 +152,5 @@ class DialogflowConnector:
 
     def normal_communicate(self, patient_sentence:str):
         res = self.communicate(patient_sentence)
-        self.consecutive_revert_flag = False
+        # self.consecutive_revert_flag = False
         return res
