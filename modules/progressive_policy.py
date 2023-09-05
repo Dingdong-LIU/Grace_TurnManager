@@ -6,7 +6,8 @@ from utils.action_composer import ActionComposer
 from modules.turn_module import TurnSegmenter, ThreadWithReturnValue, Turn
 import logging
 import queue
-
+import rospy
+import std_msgs
 
 class ProgressivePolicy:
     """
@@ -36,8 +37,20 @@ class ProgressivePolicy:
         self.handle_barge_in = config["TM"]["Debug"]["enable_barge_in"]
         self.__config = config
 
+        #ad hoc fixes
         self.need_revert = False
+        self.pending_robot_speech_finish_after_revert = False
+        self.robot_speech_finish_signal_sub = rospy.Subscriber(      
+                                        config['Custom']['Behavior']['speech_completion_topic'], 
+                                        std_msgs.msg.Bool,
+                                        self.__robot_speech_fin_callback,
+                                        queue_size=config['Custom']['Ros']['queue_size'])
     
+    def __robot_speech_fin_callback(self,msg):
+        if(self.pending_robot_speech_finish_after_revert and msg.data):
+            #if a speech finished normaliy while pending the speech finish flag
+            self.pending_robot_speech_finish_after_revert = False
+
     def set_fake_chatbot(self, use_fake_chatbot):
         self.chatbot.debug_mode(enabled=use_fake_chatbot)
     
@@ -120,13 +133,22 @@ class ProgressivePolicy:
             #     task_to_discard = self.processing_task_pool.get(block=False)
 
             
-            if self.turn_segmenter.last_human_turn: # omit the first turn barge-in
+            # no revert in the first turn
+            # no revert if just reverted and no complete speech delivered yet
+            if self.turn_segmenter.last_human_turn and (not self.pending_robot_speech_finish_after_revert): 
                 # set discard turn timestamp, human turn before this timestamp will be discarded
                 self.turn_segmenter.discard_turn = self.turn_segmenter.last_human_turn.create_time
                 # Send a revert request to the chatbot, if this is not the first turn
                 # self.revert_task = ThreadWithReturnValue(target=self.chatbot.revert_last_turn)
                 # self.revert_task.start()
                 self.need_revert = True
+
+
+                #Start to pending a speech finish flag upon first revert
+                #even with the post-poned revert system it is safe to sete the flag here already
+                self.pending_robot_speech_finish_after_revert = True
+                self.__logger.info('**** REVERT COMMAND ISSUED ****')
+
             return req
 
         # Check if there is a finished turn processing result
@@ -149,8 +171,10 @@ class ProgressivePolicy:
                 def complex_revert(discard_obj, revert_obj):
                     discard_obj.join()
                     revert_obj()
+                #Postpone revert till processing finish
                 self.revert_task = ThreadWithReturnValue(target=complex_revert, args=(discard_obj, self.chatbot.revert_last_turn))
             else:
+                #Do revert immediately
                 self.revert_task = ThreadWithReturnValue(target=self.chatbot.revert_last_turn)
             self.revert_task.start()
             
