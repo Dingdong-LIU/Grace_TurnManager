@@ -34,6 +34,7 @@ class ProgressivePolicy:
         self.revert_task = None # only for debugging purpose
         self.__logger = logging.getLogger(__name__)
 
+
         self.handle_barge_in = config["TM"]["Debug"]["enable_barge_in"]
         self.__config = config
 

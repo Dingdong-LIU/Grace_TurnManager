@@ -68,8 +68,8 @@ class TurnManager:
         self.__config_data = config_data
 
         self.__logger = setupLogger(
-                    logging.INFO, 
-                    logging.INFO, 
+                    logging.DEBUG, 
+                    logging.WARN, 
                     self.__class__.__name__,
                     os.path.join(file_path,"./logs/log_") + datetime.now().strftime(self.__config_data['Custom']['Logging']['time_format']))
         

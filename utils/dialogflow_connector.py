@@ -89,7 +89,7 @@ class DialogflowConnector:
         Returns:
             dict: reponse.json()
         """
-        self.logger.info("(Fake response) Start to communicate with chatbot: %s" ,asr_text)
+        self.logger.warn("(Fake response) Start to communicate with chatbot: %s" ,asr_text)
         time.sleep(fake_latency) # sleep to fake the latency
 
         response = {
@@ -110,10 +110,11 @@ class DialogflowConnector:
             self.start_conversation_magic_string]:
             response["responses"]["text"] = asr_text
         else:
-            response["responses"]["text"] = f"Fake response {self.call_count}. You must have waited for 1.5 seconds! Count 1 2 3 4 5 6 7 8 9 10."
+            response["responses"]["text"] = f"Fake response {self.call_count}."
+            # response["responses"]["text"] = f"Fake response {self.call_count}. You must have waited for 1.5 seconds! Count 1 2 3 4 5 6 7 8 9 10."
         # if this is not a magic string then return the fake response sentence
         self.call_count += 1
-        self.logger.info("Received replies from chatbot: %s", str(response))
+        self.logger.warn("Received replies from chatbot: %s", str(response))
         return response
     
     # revert API and behavior
