@@ -220,7 +220,7 @@ class TurnSegmenter:
             asr_input_thread.start()
             self.logger.info("Newly constructed Thread '%s' start to activately listen for new asr input.", asr_input_thread.getName())
         
-        self.logger.info("Construct a new '%s' turn: %s", turn_ownership, turn)
+        self.logger.debug("Construct a new '%s' turn: %s", turn_ownership, turn)
 
         return turn
 
@@ -283,7 +283,7 @@ class TurnSegmenter:
         """
         # Debug if turn ownership consistancy is broken
         if self.last_turn and self.last_turn.get_ownership() != self.last_turn_ownership:
-            self.logger.info("Get turn update from instant policy, update turn ownership")
+            self.logger.debug("Get turn update from instant policy, update turn ownership")
             self.last_turn_ownership = self.last_turn.get_ownership()
         
 
