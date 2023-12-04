@@ -9,7 +9,7 @@ class DialogflowConnector:
     """
     Connect to the Dialogflow chatbot module 
     """
-    def __init__(self, link='https://c0c9-143-89-145-170.ngrok-free.app') -> None:
+    def __init__(self, link='https://c0c9-143-89-145-170.ngrok-free.app', api_version='paf') -> None:
         self.NGROK_LINK = link
         random.seed(time.time())
         self.session_id = random.randint(10000000, 500000000)
@@ -26,6 +26,9 @@ class DialogflowConnector:
         # Last utterance intent is used to revert the intent when barge in happens
         self.last_utterance_intent = ""
         self.consecutive_revert_flag = False
+
+        # API version and conflicts handling
+        self.api_endpoint = "dialogue" if api_version.lower() == 'paf' else 'dialogflow_result'
 
     def debug_mode(self, enabled=False):
         if enabled:
@@ -50,13 +53,14 @@ class DialogflowConnector:
             return empty_response
         try:
             response = requests.post(
-                f"{self.NGROK_LINK}/dialogflow_result",
+                f"{self.NGROK_LINK}/{self.api_endpoint}",
                 json={
                     "text": asr_text,
                     "session_id": self.session_id,
                     "message_list": asr_text.split("\n"),
                     "redo": len(asr_text.split("\n"))>1,
                 },
+                timeout=10,
             )
             if response.status_code == 200:
                 self.logger.info("Received replies from chatbot: %s", str(response.json()))
@@ -70,7 +74,7 @@ class DialogflowConnector:
             self.logger.error(
                 err, 
                 "Error in communicating with dialogueflow. Return empty response. url=%s, json=%s", 
-                f"{self.NGROK_LINK}/dialogflow_result", 
+                f"{self.NGROK_LINK}/{self.api_endpoint}", 
                 str({
                     "text": asr_text,
                     "session_id": self.session_id
@@ -89,7 +93,7 @@ class DialogflowConnector:
         Returns:
             dict: reponse.json()
         """
-        self.logger.warn("(Fake response) Start to communicate with chatbot: %s" ,asr_text)
+        self.logger.warning("(Fake response) Start to communicate with chatbot: %s" ,asr_text)
         time.sleep(fake_latency) # sleep to fake the latency
 
         response = {

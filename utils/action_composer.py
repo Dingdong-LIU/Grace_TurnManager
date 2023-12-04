@@ -13,7 +13,8 @@ class ActionComposer:
     This class is used to compose a action request for Grace Robot
     """
     def __init__(
-            self, database_file:str = "data/intent_emotion_mapping.xlsx", 
+            self, database_file:str = "data/intent_emotion_mapping.xlsx",
+            api_version = 'amt',
             config:dict = None,
         ):
         self.database_reader = database_reader(filename=database_file)
@@ -23,20 +24,28 @@ class ActionComposer:
         self.__config = config
         self.cantonese_annotator = Cantonese_Annotator()
 
+        self.api_version = 'amt' if api_version == 'amt' else 'paf'
+
         self.turn_action_publisher = rospy.Publisher(
                                         self.__config['Custom']['TM']['turn_action_topic'], 
                                         data_class=std_msgs.msg.String, 
                                         queue_size=config['Custom']['Ros']['queue_size'])
 
+    def get_intent_from_chatbot_reply(self, response):
+        return response['responses']['intent'] if self.api_version=='amt' else response['responses']['next_question_id']
+    
+    def get_utterance_from_chatbot_reply(self, response):
+        return response['responses']['text'] if self.api_version=='amt' else response['responses']['next_question_text']
+
     def parse_reply_from_chatbot(self, res:dict):
-        intent = res["responses"]['intent']
-        utterance = res["responses"]['text']
+        intent = self.get_intent_from_chatbot_reply(res)
+        utterance = self.get_utterance_from_chatbot_reply(res)
         # Incase there is no corresponding entry in table
         try:
             params = self.database_reader.lookup_table(intent_name=intent)
             params["intent"] = intent
         except Exception as e:
-            self.logger.error("Unable to find corresponding action params for intent %s", intent, e, exc_info=True)
+            self.logger.error(f"Unable to find corresponding action params for intent {intent}", e, exc_info=True)
             params = None
 
         try:
@@ -44,7 +53,7 @@ class ActionComposer:
             utterance = annotation
             print("+++++++++++++\n\n\n",annotation, "\n\n\n+++++")
         except Exception as e:
-            self.logger.error("Unable to find the Cantonese Annotation for the utterance %s", intent. e, exc_info=True)
+            self.logger.error(f"Unable to find the Cantonese Annotation for the utterance {intent}", e, exc_info=True)
         return (utterance, params)
 
     def compose_req(self, command:str, utterance:str, params:dict) -> dict:
