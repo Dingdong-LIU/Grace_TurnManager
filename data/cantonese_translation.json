@@ -1,5 +1,5 @@
 {
-    "你好啊！我係 Grace。你今日覺得點啊？": "你好<phoneme alphabet=\"x-amazon-jyutping\" ph=\"aa3\">啊</phoneme>！我係 Grace。你今日覺得點<phoneme alphabet=\"x-amazon-jyutping\" ph=\"aa3\">啊</phoneme>？",
+    "你好啊！我喺 Grace。你今日覺得點啊？": "<prosody rate=\"medium\"><phoneme alphabet=\"x-amazon-jyutping\" ph=\"nei5\">你</phoneme>好<phoneme alphabet=\"x-amazon-jyutping\" ph=\"aa3\">啊</phoneme>！</prosody><break time=\"0ms\"/><prosody rate=\"medium\">我<phoneme alphabet=\"x-amazon-jyutping\" ph=\"hai6\">喺</phoneme> Grace。</prosody><break time=\"0ms\"/><prosody rate=\"medium\">你今日<phoneme alphabet=\"x-amazon-jyutping\" ph=\"gau3\">覺</phoneme>得<phoneme alphabet=\"x-amazon-jyutping\" ph=\"dim2\">點</phoneme><phoneme alphabet=\"x-amazon-jyutping\" ph=\"aa3\">啊</phoneme>？</prosody>",
     "係呀？真系好啦": "係<phoneme alphabet=\"x-amazon-jyutping\" ph=\"aa4\">呀</phoneme>？真系好啦",
     "哦，真系太好啦": "<phoneme alphabet=\"x-amazon-jyutping\" ph=\"ngo5\">哦</phoneme>，真系太好啦",
     "哦，真系好喎": "<phoneme alphabet=\"x-amazon-jyutping\" ph=\"ngo5\">哦</phoneme>，真系好喎",

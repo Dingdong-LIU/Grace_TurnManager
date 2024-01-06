@@ -45,7 +45,8 @@ class DialogflowConnector:
         empty_response = {
             "responses" : {
                 "intent" : "",
-                "text" : ""
+                "text" : "",
+                "next_question_id": ""
                 }
             }
         if not asr_text or asr_text == "":
