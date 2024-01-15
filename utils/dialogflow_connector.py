@@ -41,7 +41,8 @@ class DialogflowConnector:
         print(self.session_id)
 
     def real_communicate(self, asr_text):            
-        self.logger.info("Start to communicate with chatbot: %s" ,asr_text)
+        self.logger.info("Start to communicate with chatbot (fake delay 0.1s): %s" ,asr_text)
+        time.sleep(0.1)
         empty_response = {
             "responses" : {
                 "intent" : "",
