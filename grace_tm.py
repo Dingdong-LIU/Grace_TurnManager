@@ -28,6 +28,7 @@ sys.path.append(os.path.join(file_path, '..'))
 import Grace_Pace_Monitor.grace_instantaneous_state_monitor
 import Grace_Instantaneous_Policy.grace_instantaneous_policy
 import Grace_Behav_Executor.grace_behav_exec
+import Grace_Behav_Executor.utils.TTSExec
 from CommonConfigs.grace_cfg_loader import loadGraceConfigs
 from CommonConfigs.logging import setupLogger
 
@@ -142,6 +143,20 @@ class TurnManager:
             # Set the fake chatbot
             if self.__config_data["TM"]["Debug"].get("fake_chatbot", False):
                 self.__policy_progressive.set_fake_chatbot(self.__config_data["TM"]["Debug"]['fake_chatbot'])
+
+
+        if(self.__config_data['TM']['Debug']['cache_tts']):
+            #Run through all the tts sentences to cache them locally
+
+            from utils.mannual_cache import read_cantonese_translation_json
+            # import Grace_Behav_Executor.utils.TTSExec
+            #Get a list of utterance from the annotated json file
+            annotation_list = read_cantonese_translation_json()
+            tmp_tts_exec = Grace_Behav_Executor.utils.TTSExec.TTSExec(self.__config_data,self.__logger)
+            for utterance_it in range(len(annotation_list)):
+                #Compose a behavior request object
+                tmp_tts_exec.say(annotation_list[utterance_it],self.__config_data['BehavExec']['TTS']['cantonese_language_code'])
+                time.sleep(2)
 
 
     def __startConvCallback(self, msg):

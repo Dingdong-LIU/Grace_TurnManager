@@ -19,6 +19,7 @@ class DialogflowConnector:
         self.start_conversation_magic_string = "INITIALIZE-SESSION"
         self.gracefully_end_magic_string = "gracefully exit the interaction."
         self.repeat_magic_string = "please repeat"
+        self.long_time_no_answer_string = "no response after a long time (say 10 seconds)"
 
         self.communicate = self.real_communicate
         self.call_count = 0
@@ -65,7 +66,7 @@ class DialogflowConnector:
                 timeout=10,
             )
             if response.status_code == 200:
-                self.logger.info("Received replies from chatbot: %s", str(response.json()))
+                self.logger.info("Session ID: %d  Received replies from chatbot: %s", self.session_id, str(response.json()))
                 self.last_utterance_intent = dict(response.json())["responses"]['intent']
                 return response.json()
 
@@ -150,6 +151,12 @@ class DialogflowConnector:
             "Gracefully end the conversation with magic string: %s", self.gracefully_end_magic_string
         )
         return self.communicate(asr_text=self.gracefully_end_magic_string)
+
+    def long_time_no_answer(self):
+        self.logger.info(
+            "Tell the chatbot long time no response: %s", self.long_time_no_answer_string
+        )
+        return self.communicate(asr_text=self.long_time_no_answer_string)
 
     def repeat(self):
         self.logger.info(

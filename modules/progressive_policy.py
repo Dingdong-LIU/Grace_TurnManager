@@ -62,8 +62,8 @@ class ProgressivePolicy:
     
     def process_longlong_not_owned_turn(self, turn: Turn):
         self.action_composer.publish_turn_taking_signal()
-        self.__logger.warning("Human stop speaking for too long, need gracefully end")
-        res = self.chatbot.gracefully_end()
+        self.__logger.warning("Human stop speaking for too long, tell chatbot this thing")
+        res = self.chatbot.long_time_no_answer()
         utterance, params = self.action_composer.parse_reply_from_chatbot(res)
         req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
         return req
