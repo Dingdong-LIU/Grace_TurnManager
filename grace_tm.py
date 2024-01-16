@@ -156,7 +156,7 @@ class TurnManager:
             for utterance_it in range(len(annotation_list)):
                 #Compose a behavior request object
                 tmp_tts_exec.say(annotation_list[utterance_it],self.__config_data['BehavExec']['TTS']['cantonese_language_code'])
-                time.sleep(2)
+                time.sleep(5)
 
 
     def __startConvCallback(self, msg):
