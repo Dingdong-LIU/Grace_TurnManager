@@ -163,6 +163,7 @@ class TurnManager:
                     audio_path,
                     utterance_key,
                     tmp_tts_exec)
+                time.sleep(1.5)
                 
     #For TTS cache
     def ttsPathCallback(self,msg):
