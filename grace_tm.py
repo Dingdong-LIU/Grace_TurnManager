@@ -146,17 +146,49 @@ class TurnManager:
 
 
         if(self.__config_data['TM']['Debug']['cache_tts']):
-            #Run through all the tts sentences to cache them locally
-
+            #Run through all the tts sentences to cache them locally and generate audio files for proof-hearing
             from utils.mannual_cache import read_cantonese_translation_json
-            # import Grace_Behav_Executor.utils.TTSExec
             #Get a list of utterance from the annotated json file
-            annotation_list = read_cantonese_translation_json()
+            annotation_dict = read_cantonese_translation_json()
+            #Publisher for tts request
             tmp_tts_exec = Grace_Behav_Executor.utils.TTSExec.TTSExec(self.__config_data,self.__logger)
-            for utterance_it in range(len(annotation_list)):
-                #Compose a behavior request object
-                tmp_tts_exec.say(annotation_list[utterance_it],self.__config_data['BehavExec']['TTS']['cantonese_language_code'])
-                time.sleep(2.5)
+            #Subscriber for tts file
+            tts_path_subscriber = rospy.Subscriber('/hr/control/speech/tts_stream',std_msgs.msg.String, self.ttsPathCallback,queue_size=100)
+            #Loop over all annotations
+            audio_path = "../AudioFiles/Annotated"
+            self.generated_audio_file_path = None
+            for utterance_key in annotation_dict:
+                self.generateAudio(
+                    annotation_dict[utterance_key],
+                    audio_path,
+                    utterance_key,
+                    tmp_tts_exec)
+                
+    #For TTS cache
+    def ttsPathCallback(self,msg):
+        self.generated_audio_file_path = msg.data
+            
+    def generateAudio(self, text_in, file_dir, raw_text, tmp_tts_exec):
+        import urllib
+        host_address = 'http://192.168.99.10:8000'
+        rate = rospy.Rate(10)
+        #Compose a behavior request object and publish for execution
+        tmp_tts_exec.say(text_in,self.__config_data['BehavExec']['TTS']['cantonese_language_code'])
+        #Retrieve the audio files
+        while True:
+            if(self.generated_audio_file_path is not None):
+                print('Raw text is %s.' % (raw_text) )
+                break
+            rate.sleep()
+        #Copy the audio file
+        remote_url = host_address+self.generated_audio_file_path
+        file_path = os.path.join(file_dir,raw_text+ '.wav')
+        urllib.request.urlretrieve(remote_url, file_path)
+        self.generated_audio_file_path = None                
+
+
+
+
 
 
     def __startConvCallback(self, msg):
