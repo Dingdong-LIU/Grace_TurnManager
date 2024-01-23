@@ -29,6 +29,7 @@ import Grace_Pace_Monitor.grace_instantaneous_state_monitor
 import Grace_Instantaneous_Policy.grace_instantaneous_policy
 import Grace_Behav_Executor.grace_behav_exec
 import Grace_Behav_Executor.utils.TTSExec
+import Grace_Behav_Executor.utils.DisengageExec
 from CommonConfigs.grace_cfg_loader import loadGraceConfigs
 from CommonConfigs.logging import setupLogger
 
@@ -58,7 +59,8 @@ import std_msgs
 
 def killSelf():
     pid = os.getpid()
-    os.kill(pid)
+    os.kill(pid,SIGINT)
+
 class TurnManager:
 
     def __init__(self, config_data):
@@ -117,7 +119,10 @@ class TurnManager:
         self.__hum_behav_exec = Grace_Behav_Executor.grace_behav_exec.BehavExec(
                                         self.__config_data, False, 
                                         Grace_Behav_Executor.grace_behav_exec.ExecFnc.HUM)
-
+        self.__disengage_exec = Grace_Behav_Executor.utils.DisengageExec.DisengageExec(
+                                            self.__config_data,
+                                            self.__logger
+                                        )
 
         #Instantiate critical components of instantaneous parts
         self.__state_monitor_inst = Grace_Pace_Monitor.grace_instantaneous_state_monitor.InstantaneousStateMonitor(self.__config_data, self.__logger, self.__nh)
@@ -196,6 +201,13 @@ class TurnManager:
         self.__conv_alive_flag = True
 
     def __endOfConvCallback(self, msg = None):
+
+        #Call the physical disengagement service in a separate thread
+        if(self.__config_data['TM']['Debug']['enable_physical_disengage']):
+            disengage_thread = threading.Thread(self.__disengage_exec.disengage())
+            disengage_thread.start()
+
+        #Say disengage word
         self.__speak_behav_exec.initiateBehaviorThread(
             self.__composeBehavReq(
                 cmd = self.__config_data["BehavExec"]["General"]["comp_behav_exec_cmd"],
@@ -244,6 +256,11 @@ class TurnManager:
             #If there is, apply the speech action from prog part
 
             if decisions['prog_act'] is not None:
+                #Call the physical disengagement service in a separate thread
+                if(self.__config_data['TM']['Debug']['enable_physical_disengage']):
+                    disengage_thread = threading.Thread(self.__disengage_exec.disengage())
+                    disengage_thread.start()
+
                 progressive_action = decisions['prog_act']
                 self.__logger.info(progressive_action)
                 self.__speak_behav_exec.initiateBehaviorThread(
@@ -260,6 +277,10 @@ class TurnManager:
                      and progressive_action['end_conversation']
                 ):
                     killSelf()
+
+
+
+
 
         elif( decisions['inst_act']['bc_action'] != None ):
             #If no action from the progressive side, apply actions from the inst part (if any)

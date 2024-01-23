@@ -75,13 +75,14 @@ class ProgressivePolicy:
         # get the engagement level
         engagement_level = turn.get_engagement_level()
         # Gracefully end the conversation if the engagement level is "agitated"
-        if engagement_level == "agitated":
-            self.__logger.warning("Ask robot to gracefully end due to agitation of patient")
-            res = self.chatbot.gracefully_end()
-            utterance, params = self.action_composer.parse_reply_from_chatbot(res)
-            req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
+        # Removed as we already have realtime emotion tracker.
+        # if engagement_level == "agitated":
+        #     self.__logger.warning("Ask robot to gracefully end due to agitation of patient")
+        #     res = self.chatbot.gracefully_end()
+        #     utterance, params = self.action_composer.parse_reply_from_chatbot(res)
+        #     req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
         # If the engagement level is "distracted", then ask the user to repeat
-        elif engagement_level == "distracted":
+        if engagement_level == "distracted":
             self.__logger.warning("Ask robot to repeat due to distraction of patient")
             res = self.chatbot.repeat()
             utterance, params = self.action_composer.parse_reply_from_chatbot(res)
