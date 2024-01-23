@@ -276,6 +276,12 @@ class TurnManager:
                     ('end_conversation' in progressive_action) 
                      and progressive_action['end_conversation']
                 ):
+                    #Call the physical disengagement service in a separate thread
+                    if(self.__config_data['TM']['Debug']['enable_physical_disengage']):
+                        disengage_thread = threading.Thread(self.__disengage_exec.disengage())
+                        disengage_thread.start()
+
+
                     killSelf()
 
 
