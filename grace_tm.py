@@ -196,6 +196,13 @@ class TurnManager:
 
 
 
+    def __physicalDisengageRoutine(self):
+        #Call the physical disengagement service in a separate thread
+        if(self.__config_data['TM']['Debug']['enable_physical_disengage']):
+            disengage_thread = threading.Thread(
+                group=None,
+                target=self.__disengage_exec.disengage)
+            disengage_thread.start()
 
     def __startConvCallback(self, msg):
         self.__conv_alive_flag = True
@@ -204,8 +211,7 @@ class TurnManager:
 
         #Call the physical disengagement service in a separate thread
         if(self.__config_data['TM']['Debug']['enable_physical_disengage']):
-            disengage_thread = threading.Thread(self.__disengage_exec.disengage())
-            disengage_thread.start()
+            self.__physicalDisengageRoutine()
 
         #Say disengage word
         self.__speak_behav_exec.initiateBehaviorThread(
@@ -256,11 +262,6 @@ class TurnManager:
             #If there is, apply the speech action from prog part
 
             if decisions['prog_act'] is not None:
-                #Call the physical disengagement service in a separate thread
-                if(self.__config_data['TM']['Debug']['enable_physical_disengage']):
-                    disengage_thread = threading.Thread(self.__disengage_exec.disengage())
-                    disengage_thread.start()
-
                 progressive_action = decisions['prog_act']
                 self.__logger.info(progressive_action)
                 self.__speak_behav_exec.initiateBehaviorThread(
@@ -276,12 +277,7 @@ class TurnManager:
                     ('end_conversation' in progressive_action) 
                      and progressive_action['end_conversation']
                 ):
-                    #Call the physical disengagement service in a separate thread
-                    if(self.__config_data['TM']['Debug']['enable_physical_disengage']):
-                        disengage_thread = threading.Thread(self.__disengage_exec.disengage())
-                        disengage_thread.start()
-
-
+                    self.__physicalDisengageRoutine()
                     killSelf()
 
 
