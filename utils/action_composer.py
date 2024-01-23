@@ -1,11 +1,13 @@
-import grace_attn_msgs.msg
-import grace_attn_msgs.srv
-import std_msgs
+import logging
+
+# import grace_attn_msgs.msg
 import rospy
 
-import logging
+# import grace_attn_msgs.srv
+import std_msgs
 from utils.database_reader import database_reader
-from utils.cantonese_annotator import Cantonese_Annotator
+
+# from utils.cantonese_annotator import Cantonese_Annotator
 
 
 class ActionComposer:
@@ -22,7 +24,7 @@ class ActionComposer:
         self.lang = config["BehavExec"]["TTS"]["tts_language_code"]
         self.logger = logging.getLogger(__name__)
         self.__config = config
-        self.cantonese_annotator = Cantonese_Annotator()
+        # self.cantonese_annotator = Cantonese_Annotator()
 
         self.api_version = 'amt' if api_version == 'amt' else 'paf'
 
@@ -35,7 +37,14 @@ class ActionComposer:
         return response['responses']['intent'] if self.api_version=='amt' else response['responses']['next_question_id']
     
     def get_utterance_from_chatbot_reply(self, response):
-        return response['responses']['text'] if self.api_version=='amt' else response['responses']['next_question_text']
+        chatbot_reply_text = ""
+        if self.api_version == "amt":
+            chatbot_reply_text = response['responses']["text"]
+        else:
+            chatbot_reply_text = response["responses"].get("next_question_with_tone", None)
+            if chatbot_reply_text is None:
+                chatbot_reply_text = response['responses']['next_question_text']
+        return chatbot_reply_text
 
     def parse_reply_from_chatbot(self, res:dict):
         intent = self.get_intent_from_chatbot_reply(res)
@@ -48,12 +57,12 @@ class ActionComposer:
             self.logger.error(f"Unable to find corresponding action params for intent {intent}", e, exc_info=True)
             params = None
 
-        try:
-            annotation = self.cantonese_annotator.lookup_annotation(utterance)
-            utterance = annotation
-            print("+++++++++++++\n\n\n",annotation, "\n\n\n+++++")
-        except Exception as e:
-            self.logger.error(f"Unable to find the Cantonese Annotation for the utterance {intent}", e, exc_info=True)
+        # try:
+        #     annotation = self.cantonese_annotator.lookup_annotation(utterance)
+        #     utterance = annotation
+        #     print("+++++++++++++\n\n\n",annotation, "\n\n\n+++++")
+        # except Exception as e:
+        #     self.logger.error(f"Unable to find the Cantonese Annotation for the utterance {intent}", e, exc_info=True)
         return (utterance, params)
 
     def compose_req(self, command:str, utterance:str, params:dict) -> dict:

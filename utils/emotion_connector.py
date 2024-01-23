@@ -66,11 +66,13 @@ class FE_Connector:
         """
         return self.emotion
     
-    def vote_agitation(self, agitation_threshold=3, agitation_length=30):
+    def vote_agitation(self, agitation_threshold=3, agitation_length=30, enabled=False):
         """Vote the agitation signal from emotion recognition subscriber. Using two criterion:
         1. If "Agitation" exceeds a limit, then return Ture
         2. If there is a consecutive "Agitation" signal for a certain length, then return True
         """
+        if not enabled:
+            return False
         # check criterion 1
         if (self.emotion.count("Agitation") + self.emotion.count('Anger')) > agitation_threshold * self.frequency:
             return True

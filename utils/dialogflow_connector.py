@@ -25,7 +25,7 @@ class DialogflowConnector:
         self.call_count = 0
 
         # Last utterance intent is used to revert the intent when barge in happens
-        self.last_utterance_intent = ""
+        # self.last_utterance_intent = ""
         self.consecutive_revert_flag = False
 
         # API version and conflicts handling
@@ -67,7 +67,7 @@ class DialogflowConnector:
             )
             if response.status_code == 200:
                 self.logger.info("Session ID: %d  Received replies from chatbot: %s", self.session_id, str(response.json()))
-                self.last_utterance_intent = dict(response.json())["responses"]['intent']
+                # self.last_utterance_intent = dict(response.json())["responses"]['intent']
                 return response.json()
 
             # If status code is not 200
