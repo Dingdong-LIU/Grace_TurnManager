@@ -89,11 +89,11 @@ class ActionComposer:
             action_content['utterance'] = utterance
             action_content['lang'] = self.lang
             action_content['end_conversation'] = False
-            if utterance == '冇問題, 我明白. 我會搵第個護士嚟幫手.':
+            if utterance in ['冇問題, 我明白. 我會搵第個護士嚟幫手.']: #, "唔好意思, 我而家即刻搵個護士嚟幫手"
                 action_content['end_conversation'] = True
             else:
                 intent = params.get('intent', None)
-                if intent and intent in ["(Q10.Skip) Repeat Address - Reach max limit", "(Q10.Success) Repeat Address", "(Special) Gracefully exit", "(Special) Emergency"]:
+                if intent and intent in ["emergency_help","(Q10.Skip) Repeat Address - Reach max limit", "(Q10.Success) Repeat Address", "(Special) Gracefully exit", "(Special) Emergency"]:
                     action_content['end_conversation'] = True
         
         

@@ -135,7 +135,7 @@ class DialogflowConnector:
             self.logger.info('REVERT COMMAND SKIPPED')
             return
         self.consecutive_revert_flag = True
-        self.logger.info("Revert previous sentence with magic string and Intent: '%s', '%s'", self.revert_magic_string, self.last_utterance_intent)
+        self.logger.info("Revert previous sentence with magic string and Intent: '%s', '%s'", self.revert_magic_string)
         response = self.communicate(asr_text=self.revert_magic_string)
         return response
 
