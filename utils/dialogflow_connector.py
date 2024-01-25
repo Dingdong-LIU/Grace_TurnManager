@@ -13,6 +13,8 @@ class DialogflowConnector:
         self.NGROK_LINK = link
         random.seed(time.time())
         self.session_id = random.randint(10000000, 500000000)
+        # self.session_id = 12345678
+        print(f"+++++++++++++++++++\n\n Session ID for the new Interaction is: {self.session_id}\n\n+++++++++++++++++")
         self.logger = logging.getLogger(__name__)
 
         self.revert_magic_string = "revert previous intent due to barge in"
