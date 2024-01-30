@@ -29,7 +29,7 @@ import Grace_Pace_Monitor.grace_instantaneous_state_monitor
 import Grace_Instantaneous_Policy.grace_instantaneous_policy
 import Grace_Behav_Executor.grace_behav_exec
 import Grace_Behav_Executor.utils.TTSExec
-import Grace_Behav_Executor.utils.DisengageExec
+import Grace_Behav_Executor.DisengageExec
 from CommonConfigs.grace_cfg_loader import loadGraceConfigs
 from CommonConfigs.logging import setupLogger
 
@@ -119,10 +119,12 @@ class TurnManager:
         self.__hum_behav_exec = Grace_Behav_Executor.grace_behav_exec.BehavExec(
                                         self.__config_data, False, 
                                         Grace_Behav_Executor.grace_behav_exec.ExecFnc.HUM)
-        self.__disengage_exec = Grace_Behav_Executor.utils.DisengageExec.DisengageExec(
-                                            self.__config_data,
-                                            self.__logger
-                                        )
+        
+
+        self.__rotation_pub = rospy.Publisher(
+                                    self.__config_data['Custom']['Behavior']['rotation_motion_topic'],
+                                    std_msgs.msg.Float32, 
+                                    queue_size=self.__config_data['Custom']['Ros']['queue_size'])
 
         #Instantiate critical components of instantaneous parts
         self.__state_monitor_inst = Grace_Pace_Monitor.grace_instantaneous_state_monitor.InstantaneousStateMonitor(self.__config_data, self.__logger, self.__nh)
@@ -199,10 +201,7 @@ class TurnManager:
     def __physicalDisengageRoutine(self):
         #Call the physical disengagement service in a separate thread
         if(self.__config_data['TM']['Debug']['enable_physical_disengage']):
-            disengage_thread = threading.Thread(
-                group=None,
-                target=self.__disengage_exec.disengage)
-            disengage_thread.start()
+            self.__rotation_pub.publish(self.__config_data['BehavExec']['General']['disengage_ang'])
 
     def __startConvCallback(self, msg):
         self.__conv_alive_flag = True
