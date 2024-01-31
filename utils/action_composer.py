@@ -5,6 +5,7 @@ import rospy
 
 # import grace_attn_msgs.srv
 import std_msgs
+
 from utils.database_reader import database_reader
 
 # from utils.cantonese_annotator import Cantonese_Annotator
@@ -14,11 +15,13 @@ class ActionComposer:
     """
     This class is used to compose a action request for Grace Robot
     """
+
     def __init__(
-            self, database_file:str = "data/intent_emotion_mapping.xlsx",
-            api_version = 'amt',
-            config:dict = None,
-        ):
+        self,
+        database_file: str = "data/intent_emotion_mapping.xlsx",
+        api_version="amt",
+        config: dict = None,
+    ):
         self.database_reader = database_reader(filename=database_file)
         self.req = None
         self.lang = config["BehavExec"]["TTS"]["tts_language_code"]
@@ -26,27 +29,34 @@ class ActionComposer:
         self.__config = config
         # self.cantonese_annotator = Cantonese_Annotator()
 
-        self.api_version = 'amt' if api_version == 'amt' else 'paf'
+        self.api_version = "amt" if api_version == "amt" else "paf"
 
         self.turn_action_publisher = rospy.Publisher(
-                                        self.__config['Custom']['TM']['turn_action_topic'], 
-                                        data_class=std_msgs.msg.String, 
-                                        queue_size=config['Custom']['Ros']['queue_size'])
+            self.__config["Custom"]["TM"]["turn_action_topic"],
+            data_class=std_msgs.msg.String,
+            queue_size=config["Custom"]["Ros"]["queue_size"],
+        )
 
     def get_intent_from_chatbot_reply(self, response):
-        return response['responses']['intent'] if self.api_version=='amt' else response['responses']['next_question_id']
-    
+        return (
+            response["responses"]["intent"]
+            if self.api_version == "amt"
+            else response["responses"]["next_question_id"]
+        )
+
     def get_utterance_from_chatbot_reply(self, response):
         chatbot_reply_text = ""
         if self.api_version == "amt":
-            chatbot_reply_text = response['responses']["text"]
+            chatbot_reply_text = response["responses"]["text"]
         else:
-            chatbot_reply_text = response["responses"].get("next_question_with_tone", None)
+            chatbot_reply_text = response["responses"].get(
+                "next_question_with_tone", None
+            )
             if chatbot_reply_text is None:
-                chatbot_reply_text = response['responses']['next_question_text']
+                chatbot_reply_text = response["responses"]["next_question_text"]
         return chatbot_reply_text
 
-    def parse_reply_from_chatbot(self, res:dict):
+    def parse_reply_from_chatbot(self, res: dict):
         intent = self.get_intent_from_chatbot_reply(res)
         utterance = self.get_utterance_from_chatbot_reply(res)
         # Incase there is no corresponding entry in table
@@ -54,7 +64,11 @@ class ActionComposer:
             params = self.database_reader.lookup_table(intent_name=intent)
             params["intent"] = intent
         except Exception as e:
-            self.logger.error(f"Unable to find corresponding action params for intent {intent}", e, exc_info=True)
+            self.logger.error(
+                f"Unable to find corresponding action params for intent {intent}",
+                e,
+                exc_info=True,
+            )
             params = None
 
         # try:
@@ -65,7 +79,7 @@ class ActionComposer:
         #     self.logger.error(f"Unable to find the Cantonese Annotation for the utterance {intent}", e, exc_info=True)
         return (utterance, params)
 
-    def compose_req(self, command:str, utterance:str, params:dict) -> dict:
+    def compose_req(self, command: str, utterance: str, params: dict) -> dict:
         """
         Compose a request for Grace Robot
 
@@ -81,26 +95,36 @@ class ActionComposer:
         if command == "comp_exec" and (utterance == "" or params is None):
             return None
 
-        if utterance=="" and params is None:
+        if utterance == "" and params is None:
             # when compose a stop action, params is None and utterance is empty
             action_content = None
         else:
             action_content = params
-            action_content['utterance'] = utterance
-            action_content['lang'] = self.lang
-            action_content['end_conversation'] = False
-            if utterance in ['冇問題, 我明白. 我會搵第個護士嚟幫手.']: #, "唔好意思, 我而家即刻搵個護士嚟幫手"
-                action_content['end_conversation'] = True
+            action_content["utterance"] = utterance
+            action_content["lang"] = self.lang
+            action_content["end_conversation"] = False
+            if utterance in [
+                "冇問題, 我明白. 我會搵第個護士嚟幫手."
+            ]:  # , "唔好意思, 我而家即刻搵個護士嚟幫手"
+                action_content["end_conversation"] = True
             else:
-                intent = params.get('intent', None)
-                if intent and intent in ["emergency_help","(Q10.Skip) Repeat Address - Reach max limit", "(Q10.Success) Repeat Address", "(Special) Gracefully exit", "(Special) Emergency"]:
-                    action_content['end_conversation'] = True
-        
-        
+                intent = params.get("intent", None)
+                if intent and intent in [
+                    "emergency_help",
+                    "(Q10.Skip) Repeat Address - Reach max limit",
+                    "(Q10.Success) Repeat Address",
+                    "(Special) Gracefully exit",
+                    "(Special) Emergency",
+                    "confused_patient_handling",
+                ]:
+                    action_content["end_conversation"] = True
+
         req = {
             "cmd": command,
-            "content" : action_content,
-            "end_conversation": action_content.get("end_conversation", False) if action_content else False
+            "content": action_content,
+            "end_conversation": action_content.get("end_conversation", False)
+            if action_content
+            else False,
         }
         return req
 
@@ -123,18 +147,22 @@ class ActionComposer:
     #     self.req.command = command
     #     self.req.lang = self.lang
     #     return self.req
-    
+
     def publish_turn_taking_signal(self):
-        self.turn_action_publisher.publish(self.__config['InstState']['TurnAction']['robot_take_turn_action_name'])
+        self.turn_action_publisher.publish(
+            self.__config["InstState"]["TurnAction"]["robot_take_turn_action_name"]
+        )
 
     def publish_turn_yielding_signal(self):
-        self.turn_action_publisher.publish(self.__config['InstState']['TurnAction']['robot_yield_turn_action_name'])
-    
+        self.turn_action_publisher.publish(
+            self.__config["InstState"]["TurnAction"]["robot_yield_turn_action_name"]
+        )
+
     def stop_talking_action(self):
         # self.publish_turn_yielding_signal()
         req = self.compose_req(
             command=self.__config["BehavExec"]["General"]["utterance_behav_stop_cmd"],
             utterance="",
-            params=None
+            params=None,
         )
         return req
