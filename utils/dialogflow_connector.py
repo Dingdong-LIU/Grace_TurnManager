@@ -11,10 +11,6 @@ class DialogflowConnector:
     """
     def __init__(self, link='https://c0c9-143-89-145-170.ngrok-free.app', api_version='paf') -> None:
         self.NGROK_LINK = link
-        random.seed(time.time())
-        self.session_id = random.randint(10000000, 500000000)
-        # self.session_id = 12345678
-        print(f"+++++++++++++++++++\n\n Session ID for the new Interaction is: {self.session_id}\n\n+++++++++++++++++")
         self.logger = logging.getLogger(__name__)
 
         self.revert_magic_string = "revert previous intent due to barge in"
@@ -32,6 +28,24 @@ class DialogflowConnector:
 
         # API version and conflicts handling
         self.api_endpoint = "dialogue" if api_version.lower() == 'paf' else 'dialogflow_result'
+
+        
+        self.session_id = self.get_session_id()
+        print(f"+++++++++++++++++++\n\n Session ID for the new Interaction is: {self.session_id}\n\n+++++++++++++++++")
+
+    def get_session_id(self):
+        # Return a fixed session ID for the interaction. Handle the duplicated session ID problem.
+        fixed_session_id = 12345678
+        r = requests.post(f"{self.NGROK_LINK}/delete_session", json={"session_id": fixed_session_id})
+        if r.status_code != 200:
+            self.logger.error("Fail to initialize a session. Please refresh the page and try again.")
+            # Fallback to random session ID
+            random.seed(time.time())
+            return random.randint(10000000, 500000000)
+        else:
+            self.logger.info("Session initialized! " + r.json().get("responses",{}).get("result", {}))
+        return fixed_session_id
+
 
     def debug_mode(self, enabled=False):
         if enabled:
