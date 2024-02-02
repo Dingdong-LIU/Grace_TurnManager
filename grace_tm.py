@@ -262,6 +262,11 @@ class TurnManager:
 
             if decisions['prog_act'] is not None:
                 progressive_action = decisions['prog_act']
+                # First check if there is a "end_conversation" flag, if so, disable barge-in
+                # So that the disengage utterance won't be barged in
+                if 'end_conversation' in progressive_action and progressive_action['end_conversation']:
+                    self.__policy_progressive.handle_barge_in = False
+                
                 self.__logger.info(progressive_action)
                 self.__speak_behav_exec.initiateBehaviorThread(
                     self.__composeBehavReq(
