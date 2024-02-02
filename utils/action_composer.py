@@ -118,11 +118,11 @@ class ActionComposer:
                     "confused_patient_handling",
                 ]:
                     action_content["end_conversation"] = True
-                    # TODO: Nicholas change the content
+
                     if intent == "confused_patient_handling":
-                        action_content["after_rotation"] = "Ha ha ha I am confused"
+                        action_content["after_rotation"] = "唔該，我同呢位病人溝通有啲困難，你可唔可以嚟幫一幫手？"
                     elif intent == "emergency_help":
-                        action_content["after_rotation"] = "Cry I am angry"
+                        action_content["after_rotation"] = "唔該，呢位病人比較激动，你可唔可以嚟幫一幫手？"
         req = {
             "cmd": command,
             "content": action_content,
