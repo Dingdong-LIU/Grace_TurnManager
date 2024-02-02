@@ -276,7 +276,22 @@ class TurnManager:
                     ('end_conversation' in progressive_action) 
                      and progressive_action['end_conversation']
                 ):
+                    #Rotation
                     self.__physicalDisengageRoutine()
+                    time.sleep(self.__config_data["BehavExec"]["General"]["rotation_sleep"])
+
+                    #Post rotation remarks
+                    if "after_rotation" in progressive_action["content"]:
+                        progressive_action["content"]["utterance"] = progressive_action["content"]["after_rotation"]
+                        self.__logger.info("Call post rotation remarks")
+                        self.__speak_behav_exec.initiateBehaviorThread(
+                            self.__composeBehavReq(
+                                    cmd = progressive_action['cmd'], 
+                                    args=progressive_action['content']
+                                    ),
+                                end_of_conv = ('end_conversation' in progressive_action and progressive_action['end_conversation'] )
+                        )
+
                     killSelf()
 
 

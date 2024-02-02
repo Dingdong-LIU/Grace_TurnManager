@@ -118,7 +118,11 @@ class ActionComposer:
                     "confused_patient_handling",
                 ]:
                     action_content["end_conversation"] = True
-
+                    # TODO: Nicholas change the content
+                    if intent == "confused_patient_handling":
+                        action_content["after_rotation"] = "Ha ha ha I am confused"
+                    elif intent == "emergency_help":
+                        action_content["after_rotation"] = "Cry I am angry"
         req = {
             "cmd": command,
             "content": action_content,
