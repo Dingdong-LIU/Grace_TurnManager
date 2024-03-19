@@ -35,7 +35,10 @@ class DialogflowConnector:
 
     def get_session_id(self):
         # Return a fixed session ID for the interaction. Handle the duplicated session ID problem.
-        fixed_session_id = 12345678
+        # fixed_session_id = 12345678
+        fixed_session_id = input("Please enter the session id below: \n")
+        fixed_session_id = int(fixed_session_id)
+        self.logger.info("Received session id %s", fixed_session_id)
         r = requests.post(f"{self.NGROK_LINK}/delete_session", json={"session_id": fixed_session_id})
         if r.status_code != 200:
             self.logger.error("Fail to initialize a session. Please refresh the page and try again.")
