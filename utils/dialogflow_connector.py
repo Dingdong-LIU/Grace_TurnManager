@@ -37,7 +37,7 @@ class DialogflowConnector:
         # Return a fixed session ID for the interaction. Handle the duplicated session ID problem.
         # fixed_session_id = 12345678
         fixed_session_id = input("Please enter the session id below: \n")
-        fixed_session_id = int(fixed_session_id)
+        # fixed_session_id = int(fixed_session_id)
         self.logger.info("Received session id %s", fixed_session_id)
         r = requests.post(f"{self.NGROK_LINK}/delete_session", json={"session_id": fixed_session_id})
         if r.status_code != 200:
@@ -85,7 +85,7 @@ class DialogflowConnector:
                 timeout=10,
             )
             if response.status_code == 200:
-                self.logger.info("Session ID: %d  Received replies from chatbot: %s", self.session_id, str(response.json()))
+                self.logger.info("Session ID: %s  Received replies from chatbot: %s", str(self.session_id), str(response.json()))
                 # self.last_utterance_intent = dict(response.json())["responses"]['intent']
                 return response.json()
 
