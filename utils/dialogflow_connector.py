@@ -9,12 +9,17 @@ class DialogflowConnector:
     """
     Connect to the Dialogflow chatbot module 
     """
-    def __init__(self, link='https://c0c9-143-89-145-170.ngrok-free.app', api_version='paf') -> None:
+    def __init__(self, link='https://c0c9-143-89-145-170.ngrok-free.app', api_version='paf', lang="yue-Hant-HK") -> None:
         self.NGROK_LINK = link
         self.logger = logging.getLogger(__name__)
 
+        self.lang = lang
+        if lang not in ["yue-Hant-HK", "en-US"]:
+            self.logger.error(f"Langaguage code {lang} not recognizable, reset to yue-Hant-HK")
+            self.lang = "yue-Hant-HK"
+
         self.revert_magic_string = "revert previous intent due to barge in"
-        self.start_conversation_magic_string = "INITIALIZE-SESSION"
+        self.start_conversation_magic_string = "INITIALIZE-SESSION" if self.lang == "yue-Hant-HK" else "INITIALIZE-SESSION-ENGLISH"
         self.gracefully_end_magic_string = "gracefully exit the interaction."
         self.repeat_magic_string = "please repeat"
         self.long_time_no_answer_string = "no response after a long time (say 10 seconds)"
