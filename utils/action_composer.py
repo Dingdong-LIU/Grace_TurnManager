@@ -38,11 +38,12 @@ class ActionComposer:
         )
 
     def get_intent_from_chatbot_reply(self, response):
-        return (
-            response["responses"]["intent"]
+        intent = response["responses"]["intent"]
             if self.api_version == "amt"
             else response["responses"]["next_question_id"]
-        )
+        if self.api_version == "paf" and intent[-4:] == "_eng" and config["TM"]["Debug"]["language_choice"] == "en-US":
+            intent = intent[:-4]
+        return intent
 
     def get_utterance_from_chatbot_reply(self, response):
         chatbot_reply_text = ""
