@@ -16,7 +16,8 @@ class ProgressivePolicy:
     def __init__(self, asr_listener, emotion_listener, config:dict):
         self.chatbot = DialogflowConnector(
             link=config["TM"]["DialogFlow"]["url"],
-            api_version=config["TM"]["API_Version"]
+            api_version=config["TM"]["API_Version"],
+            lang=config["TM"]["Debug"]["language_choice"]
         )
 
         self.action_composer = ActionComposer(
