@@ -19,7 +19,8 @@ class DialogflowConnector:
             self.lang = "yue-Hant-HK"
 
         self.revert_magic_string = "revert previous intent due to barge in"
-        self.start_conversation_magic_string = "INITIALIZE-SESSION" if self.lang == "yue-Hant-HK" else "INITIALIZE-SESSION-ENGLISH"
+        # self.start_conversation_magic_string = "INITIALIZE-SESSION" if self.lang == "yue-Hant-HK" else "INITIALIZE-SESSION-ENGLISH\\"
+        self.start_conversation_magic_string = "INITIALIZE-SESSION-CANTONESE-GPT-Redo"
         self.gracefully_end_magic_string = "gracefully exit the interaction."
         self.repeat_magic_string = "please repeat"
         self.long_time_no_answer_string = "no response after a long time (say 10 seconds)"
