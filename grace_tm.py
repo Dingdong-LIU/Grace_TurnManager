@@ -279,8 +279,7 @@ class TurnManager:
 
         # Check if there is speech action from the progressive part
         if "prog_act" in decisions:
-            # If there is, apply the speech action from prog part
-
+            # If there is, apply the speech action from prog part with higher priority
             if decisions["prog_act"] is not None:
                 progressive_action = decisions["prog_act"]
                 # First check if there is a "end_conversation" flag, if so, disable barge-in
@@ -332,28 +331,33 @@ class TurnManager:
 
                     killSelf()
 
-        elif decisions["inst_act"]["bc_action"] is not None:
-            # If no action from the progressive side, apply actions from the inst part (if any)
-            nodding_action = decisions["inst_act"]["bc_action"]["nodding"]
-            if nodding_action is not None:
-                self.__nod_behav_exec.initiateBehaviorThread(
-                    self.__composeBehavReq(
-                        nodding_action["cmd"], args=nodding_action["args"]
-                    )
-                )
-                self.__logger.info("Nodding: %s" % nodding_action["cmd"])
+        elif decisions["inst_act"]["bc_action"] is not None:  
+            # If no action from the progressive side, apply actions from the inst part (if any) first check general bc
+            self.__gen_bc_action(decisions["inst_act"]["bc_action"]["nodding"], decisions["inst_act"]["bc_action"]["hum"])
 
-            humming_action = decisions["inst_act"]["bc_action"]["hum"]
-            if humming_action is not None:
-                self.__hum_behav_exec.initiateBehaviorThread(
-                    self.__composeBehavReq(
-                        humming_action["cmd"], humming_action["content"]
-                    )
-                )
-                self.__logger.info("Humming: %s" % humming_action["cmd"])
+        elif decisions["inst_act"]["sentiment_bc_action"] is not None:
+            # If no action from the progressive side, apply actions from the inst part (if any) second check sentiment bc -- in general there should be minimal overlap between sentiment bc and general bc because we avoided overlap in the derivation of sentiment bc 
+            self.__gen_bc_action(decisions["inst_act"]["sentiment_bc_action"]["nodding"], decisions["inst_act"]["sentiment_bc_action"]["hum"])
 
         else:
             self.__logger.debug("No action to take.")
+
+    def __gen_bc_action(self, nodding_action, humming_action):
+        if nodding_action is not None:
+            self.__nod_behav_exec.initiateBehaviorThread(
+                self.__composeBehavReq(
+                    nodding_action["cmd"], args=nodding_action["args"]
+                )
+            )
+            self.__logger.info("Nodding: %s" % nodding_action["cmd"])
+
+        if humming_action is not None:
+            self.__hum_behav_exec.initiateBehaviorThread(
+                self.__composeBehavReq(
+                    humming_action["cmd"], humming_action["content"]
+                )
+            )
+            self.__logger.info("Humming: %s" % humming_action["cmd"])
 
     def __composeBehavReq(self, cmd, args=None):
         req = grace_attn_msgs.srv.GraceBehaviorRequest()
