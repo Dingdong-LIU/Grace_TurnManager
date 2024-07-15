@@ -19,6 +19,11 @@ class SharedData:
             if not self.shared_queue.empty():
                 self.sentiment = self.shared_queue.get()
             return self.sentiment
+        
+    def is_ready(self):
+        """
+        Check if the sentiment analysis is ready, return False if sentiment anlaysis is not ready"""
+        return False
     
     def change_previous_question(self, question):
         with self.previous_question_lock:
