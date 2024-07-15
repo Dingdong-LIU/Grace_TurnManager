@@ -39,7 +39,7 @@ from modules.progressive_policy import ProgressivePolicy
 # import the ASR, Visual Class
 from utils.asr_connector import ASR_Interim_Sentence
 from utils.emotion_connector import FE_Connector
-
+from utils.shared_data import SharedData
 
 def killSelf():
     pid = os.getpid()
@@ -50,6 +50,9 @@ class TurnManager:
     def __init__(self, config_data):
         # Miscellaneous
         signal(SIGINT, handle_sigint)
+
+        # Shared data between threads
+        self.shared_data = SharedData()
 
         # Config
         self.__config_data = config_data
@@ -123,7 +126,7 @@ class TurnManager:
         )
         self.__policy_instantaneous = (
             Grace_Instantaneous_Policy.grace_instantaneous_policy.InstantaneousPolicy(
-                self.__config_data, self.__logger
+                self.__config_data, self.__logger, shared_data=self.shared_data
             )
         )
 
@@ -145,6 +148,7 @@ class TurnManager:
                 asr_listener=asr_listener,
                 emotion_listener=emotion_listener,
                 config=self.__config_data,
+                shared_data=self.shared_data
             )
             # Set the fake chatbot
             if self.__config_data["TM"]["Debug"].get("fake_chatbot", False):

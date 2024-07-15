@@ -1,4 +1,6 @@
 import time
+
+import requests
 import grace_attn_msgs.msg
 import grace_attn_msgs.srv
 from utils.dialogflow_connector import DialogflowConnector
@@ -8,17 +10,21 @@ import logging
 import queue
 import rospy
 import std_msgs
+from utils.shared_data import SharedData
 
 class ProgressivePolicy:
     """
     This class is the progressive policy module of the Grace Pace Monitor.
     """
-    def __init__(self, asr_listener, emotion_listener, config:dict):
+    def __init__(self, asr_listener, emotion_listener, config:dict, shared_data:SharedData=None):
         self.chatbot = DialogflowConnector(
             link=config["TM"]["DialogFlow"]["url"],
             api_version=config["TM"]["API_Version"],
             lang=config["TM"]["Debug"]["language_choice"]
         )
+
+        self.shared_data = shared_data
+        self.sentiment_analysis_url = config["TM"]["SentimentAnalysis"]["url"]
 
         self.action_composer = ActionComposer(
             database_file=config["TM"]["Database"]["path"],
@@ -93,6 +99,11 @@ class ProgressivePolicy:
         else:
             # get user's sentence from the turn object
             user_utterance = turn.get_asr() # This function may need some time to execute
+
+            ## TODO: Do thematic analysis here
+            sentiment = requests.post(self.sentiment_analysis_url, json={"conversation": {'ai_question':self.shared_data.previous_question, 'user_input': user_utterance}}).json()["output"]
+            self.shared_data.write_to_queue(sentiment)
+
             res = self.chatbot.normal_communicate(user_utterance)
             utterance, params = self.action_composer.parse_reply_from_chatbot(res)
             req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
