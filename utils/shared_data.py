@@ -8,6 +8,8 @@ class SharedData:
         self.shared_queue = queue.Queue() # the shared queue for current sentiment analysis
         self.previous_question = ""
         self.previous_question_lock = threading.Lock()
+        self.sentiment_analysis_lock = threading.Lock()
+        self.sentiment_ready = False
         self.sentiment = None
 
     def write_to_queue(self, data):
@@ -20,10 +22,13 @@ class SharedData:
                 self.sentiment = self.shared_queue.get()
             return self.sentiment
         
-    def is_ready(self):
+    def is_ready(self) -> bool:
+        """Check if the sentiment analysis is ready
+
+        Returns:
+            bool: True if sentiment analysis is ready, False otherwise
         """
-        Check if the sentiment analysis is ready, return False if sentiment anlaysis is not ready"""
-        return False
+        return self.sentiment_ready
     
     def change_previous_question(self, question):
         with self.previous_question_lock:

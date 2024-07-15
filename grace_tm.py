@@ -262,6 +262,10 @@ class TurnManager:
             if progressive_actions is not None:
                 decisions["prog_act"] = progressive_actions
 
+                # Update asked question here
+                self.shared_data.change_previous_question(progressive_actions["content"]["utterance"])
+                self.shared_data.sentiment_ready = False
+
         return decisions
 
     def __mergeExec(self, decisions):

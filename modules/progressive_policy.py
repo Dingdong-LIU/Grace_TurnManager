@@ -74,6 +74,20 @@ class ProgressivePolicy:
         utterance, params = self.action_composer.parse_reply_from_chatbot(res)
         req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
         return req
+    
+    def sentiment_analysis(self, user_utterance:str):
+        with self.shared_data.sentiment_analysis_lock:
+            sentiment = requests.post(
+                self.sentiment_analysis_url + "/predict",
+                json={
+                    "conversation": {
+                        "ai_question": self.shared_data.previous_question,
+                        "user_input": user_utterance,
+                    }
+                },
+            ).json()["output"]
+            self.shared_data.write_to_queue(sentiment)
+            self.shared_data.sentiment_ready = True
 
     def process_human_turn(self, turn:Turn) -> grace_attn_msgs.srv.GraceBehaviorRequest:
         # indicate robot wants to take turn
@@ -100,12 +114,17 @@ class ProgressivePolicy:
             # get user's sentence from the turn object
             user_utterance = turn.get_asr() # This function may need some time to execute
 
-            ## TODO: Do thematic analysis here
-            sentiment = requests.post(self.sentiment_analysis_url + "/predict", json={"conversation": {'ai_question':self.shared_data.previous_question, 'user_input': user_utterance}}).json()["output"]
-            self.shared_data.write_to_queue(sentiment)
+            ## Do thematic analysis here with a seperate Thread
+            sentiment_thread = ThreadWithReturnValue(target=self.sentiment_analysis, args=(user_utterance,))
+            sentiment_thread.start()
 
             res = self.chatbot.normal_communicate(user_utterance)
             utterance, params = self.action_composer.parse_reply_from_chatbot(res)
+
+            # # Update previous question for sentiment analysis
+            # Move to actual execution stage
+            # self.shared_data.change_previous_question(user_utterance)
+
             req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
 
         return req
