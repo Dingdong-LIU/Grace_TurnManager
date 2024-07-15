@@ -8,6 +8,7 @@ class SharedData:
         self.shared_queue = queue.Queue() # the shared queue for current sentiment analysis
         self.previous_question = ""
         self.previous_question_lock = threading.Lock()
+        self.sentiment = None
 
     def write_to_queue(self, data):
         with self.queue_lock:
@@ -16,8 +17,8 @@ class SharedData:
     def read_from_queue(self):
         with self.queue_lock:
             if not self.shared_queue.empty():
-                return self.shared_queue.get()
-            return None
+                self.sentiment = self.shared_queue.get()
+            return self.sentiment
     
     def change_previous_question(self, question):
         with self.previous_question_lock:
