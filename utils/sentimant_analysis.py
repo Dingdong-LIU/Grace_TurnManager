@@ -18,7 +18,7 @@ generation_config = GenerationConfig.from_pretrained(
 @app.route("/predict", methods=["POST"])
 def predict():
     data = request.get_json()
-    input_text = f"判断以下对问题回答的情感极性: {data["conversation"]}"
+    input_text = f"判断以下对问题回答的情感极性: {data['conversation']}"
     result = "non-negative"
     # Perform inference using your T5 model
     input_ids = tokenizer(input_text, return_tensors="pt").input_ids

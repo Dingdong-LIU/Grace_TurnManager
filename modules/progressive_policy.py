@@ -101,7 +101,7 @@ class ProgressivePolicy:
             user_utterance = turn.get_asr() # This function may need some time to execute
 
             ## TODO: Do thematic analysis here
-            sentiment = requests.post(self.sentiment_analysis_url, json={"conversation": {'ai_question':self.shared_data.previous_question, 'user_input': user_utterance}}).json()["output"]
+            sentiment = requests.post(self.sentiment_analysis_url + "/predict", json={"conversation": {'ai_question':self.shared_data.previous_question, 'user_input': user_utterance}}).json()["output"]
             self.shared_data.write_to_queue(sentiment)
 
             res = self.chatbot.normal_communicate(user_utterance)
