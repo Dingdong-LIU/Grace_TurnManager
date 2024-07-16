@@ -27,6 +27,9 @@ def predict():
     output_str = tokenizer.batch_decode(output, skip_special_tokens=True)
     if '消极' in output_str:
         result = "negative"
+    # log the input and output to console
+    print(f"Input: {input_text}\n Output: {output_str}")
+    
     return jsonify({"output": result})
 
 
