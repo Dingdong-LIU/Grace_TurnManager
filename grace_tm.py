@@ -263,7 +263,7 @@ class TurnManager:
                 decisions["prog_act"] = progressive_actions
 
                 # Update asked question here
-                self.shared_data.change_previous_question(progressive_actions["content"]["utterance"])
+                # self.shared_data.change_previous_question(progressive_actions["content"]["utterance"])
                 self.shared_data.change_previous_question(progressive_actions.get("content", {}).get("utterance", ""))
                 self.shared_data.sentiment_ready = False
 
