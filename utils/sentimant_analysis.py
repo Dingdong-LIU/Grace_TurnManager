@@ -1,3 +1,4 @@
+import time
 from flask import Flask, request, jsonify
 import torch
 from transformers import T5Tokenizer, AutoModelForSeq2SeqLM, GenerationConfig
@@ -17,6 +18,9 @@ generation_config = GenerationConfig.from_pretrained(
 
 @app.route("/predict", methods=["POST"])
 def predict():
+    # record response delay
+    start_time = time.time()
+
     data = request.get_json()
     input_text = f"判断以下对问题回答的情感极性: {data['conversation']}"
     result = "non-negative"
@@ -28,7 +32,8 @@ def predict():
     if '消极' in output_str:
         result = "negative"
     # log the input and output to console
-    print(f"Input: {input_text}\n Output: {output_str}")
+    end_time = time.time()
+    print(f"Input: {input_text}\n Output: {output_str} \n Execution time: {end_time - start_time} seconds")
     
     return jsonify({"output": result})
 
