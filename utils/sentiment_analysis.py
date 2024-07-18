@@ -23,7 +23,7 @@ def predict():
 
     data = request.get_json()
     input_text = f"判断以下对问题回答的情感极性: {data['conversation']}"
-    result = "non-negative"
+    result = "neutral"
     # Perform inference using your T5 model
     input_ids = tokenizer(input_text, return_tensors="pt").input_ids
     with torch.no_grad():
@@ -31,6 +31,10 @@ def predict():
     output_str = tokenizer.batch_decode(output, skip_special_tokens=True)
     if '消极' in output_str:
         result = "negative"
+    elif '中性' in output_str:
+        result = "neutral"
+    elif '积极' in output_str:
+        result = "positive"
     # log the input and output to console
     end_time = time.time()
     print(f"Input: {input_text}\n Output: {output_str} \n Execution time: {end_time - start_time} seconds")
