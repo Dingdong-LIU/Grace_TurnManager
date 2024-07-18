@@ -3,13 +3,20 @@ import random
 import time
 import requests
 
+from modules.turn_module import ThreadWithReturnValue
+from utils.shared_data import SharedData
+
 # NGROL_URI = 'https://c0c9-143-89-145-170.ngrok-free.app'
 
 class DialogflowConnector:
     """
     Connect to the Dialogflow chatbot module 
     """
-    def __init__(self, link='https://c0c9-143-89-145-170.ngrok-free.app', api_version='paf', lang="yue-Hant-HK") -> None:
+    def __init__(self, link='https://c0c9-143-89-145-170.ngrok-free.app', api_version='paf', lang="yue-Hant-HK", shared_data:SharedData=None, sentiment_analysis_url:str="") -> None:
+
+        self.shared_data = shared_data
+        self.sentiment_analysis_url = sentiment_analysis_url
+
         self.NGROK_LINK = link
         self.logger = logging.getLogger(__name__)
 
@@ -54,7 +61,20 @@ class DialogflowConnector:
         else:
             self.logger.info("Session initialized! " + r.json().get("responses",{}).get("result", {}))
         return fixed_session_id
-
+    
+    def sentiment_analysis(self, user_utterance: str):
+        with self.shared_data.sentiment_analysis_lock:
+            sentiment = requests.post(
+                self.sentiment_analysis_url + "/predict",
+                json={
+                    "conversation": {
+                        "ai_question": self.shared_data.previous_question,
+                        "user_input": user_utterance,
+                    }
+                },
+            ).json()["output"]
+            self.shared_data.write_to_queue(sentiment)
+            self.shared_data.sentiment_ready = True
 
     def debug_mode(self, enabled=False):
         if enabled:
@@ -67,6 +87,12 @@ class DialogflowConnector:
         print(self.session_id)
 
     def real_communicate(self, asr_text):            
+
+        # Do additional sentiment analysis here
+        ## Do thematic analysis here with a seperate Thread
+        sentiment_thread = ThreadWithReturnValue(target=self.sentiment_analysis, args=(asr_text,))
+        sentiment_thread.start()
+
         self.logger.info("Start to communicate with chatbot: %s" ,asr_text)
         # time.sleep(0.1)
         empty_response = {

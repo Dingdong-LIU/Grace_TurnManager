@@ -1,8 +1,6 @@
 import time
 
 import requests
-import grace_attn_msgs.msg
-import grace_attn_msgs.srv
 from utils.dialogflow_connector import DialogflowConnector
 from utils.action_composer import ActionComposer
 from modules.turn_module import TurnSegmenter, ThreadWithReturnValue, Turn
@@ -20,11 +18,13 @@ class ProgressivePolicy:
         self.chatbot = DialogflowConnector(
             link=config["TM"]["DialogFlow"]["url"],
             api_version=config["TM"]["API_Version"],
-            lang=config["TM"]["Debug"]["language_choice"]
+            lang=config["TM"]["Debug"]["language_choice"],
+            shared_data=shared_data,
+            sentiment_analysis_url=config["TM"]["SentimentAnalysis"]["url"],
         )
 
-        self.shared_data = shared_data
-        self.sentiment_analysis_url = config["TM"]["SentimentAnalysis"]["url"]
+        # self.shared_data = shared_data
+        # self.sentiment_analysis_url = config["TM"]["SentimentAnalysis"]["url"]
 
         self.action_composer = ActionComposer(
             database_file=config["TM"]["Database"]["path"],
@@ -75,21 +75,21 @@ class ProgressivePolicy:
         req = self.action_composer.compose_req(command="comp_exec", utterance=utterance, params=params)
         return req
     
-    def sentiment_analysis(self, user_utterance:str):
-        with self.shared_data.sentiment_analysis_lock:
-            sentiment = requests.post(
-                self.sentiment_analysis_url + "/predict",
-                json={
-                    "conversation": {
-                        "ai_question": self.shared_data.previous_question,
-                        "user_input": user_utterance,
-                    }
-                },
-            ).json()["output"]
-            self.shared_data.write_to_queue(sentiment)
-            self.shared_data.sentiment_ready = True
+    # def sentiment_analysis(self, user_utterance:str):
+    #     with self.shared_data.sentiment_analysis_lock:
+    #         sentiment = requests.post(
+    #             self.sentiment_analysis_url + "/predict",
+    #             json={
+    #                 "conversation": {
+    #                     "ai_question": self.shared_data.previous_question,
+    #                     "user_input": user_utterance,
+    #                 }
+    #             },
+    #         ).json()["output"]
+    #         self.shared_data.write_to_queue(sentiment)
+    #         self.shared_data.sentiment_ready = True
 
-    def process_human_turn(self, turn:Turn) -> grace_attn_msgs.srv.GraceBehaviorRequest:
+    def process_human_turn(self, turn:Turn):
         # indicate robot wants to take turn
         self.action_composer.publish_turn_taking_signal()
 
