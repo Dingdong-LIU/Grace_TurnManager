@@ -115,10 +115,11 @@ class ProgressivePolicy:
             user_utterance = turn.get_asr() # This function may need some time to execute
 
             ## Do thematic analysis here with a seperate Thread
-            sentiment_thread = ThreadWithReturnValue(target=self.sentiment_analysis, args=(user_utterance,))
-            sentiment_thread.start()
+            # sentiment_thread = ThreadWithReturnValue(target=self.sentiment_analysis, args=(user_utterance,))
+            # sentiment_thread.start()
 
             res = self.chatbot.normal_communicate(user_utterance)
+            print("res:\n", res)
             utterance, params = self.action_composer.parse_reply_from_chatbot(res)
 
             # # Update previous question for sentiment analysis

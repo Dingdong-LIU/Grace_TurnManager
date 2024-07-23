@@ -340,9 +340,12 @@ class TurnManager:
             # If no action from the progressive side, apply actions from the inst part (if any) first check general bc
             self.__gen_bc_action(decisions["inst_act"]["bc_action"]["nodding"], decisions["inst_act"]["bc_action"]["hum"])
 
-        elif decisions["inst_act"]["sentiment_bc_action"] is not None:
+        elif decisions["inst_act"]["sentiment_bc_action"]:
             # If no action from the progressive side, apply actions from the inst part (if any) second check sentiment bc -- in general there should be minimal overlap between sentiment bc and general bc because we avoided overlap in the derivation of sentiment bc 
-            self.__gen_bc_action(decisions["inst_act"]["sentiment_bc_action"]["nodding"], decisions["inst_act"]["sentiment_bc_action"]["hum"])
+            self.__gen_bc_action(
+                decisions["inst_act"]["sentiment_bc_action"].get("nodding", None), 
+                decisions["inst_act"]["sentiment_bc_action"]["hum"]
+            )
 
         else:
             self.__logger.debug("No action to take.")

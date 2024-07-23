@@ -14,7 +14,7 @@ tokenizer = T5Tokenizer.from_pretrained(
     "yuyijiong/T5-large-sentiment-analysis-Chinese-MultiTask"
 )
 model = AutoModelForSeq2SeqLM.from_pretrained(
-    "yuyijiong/T5-large-sentiment-analysis-Chinese-MultiTask", device="cuda"
+    "yuyijiong/T5-large-sentiment-analysis-Chinese-MultiTask", device_map="auto"
 )
 generation_config = GenerationConfig.from_pretrained(
     "yuyijiong/T5-large-sentiment-analysis-Chinese-MultiTask"

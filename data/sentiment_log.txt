@@ -1,0 +1,294 @@
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'INITIALIZE-SESSION-CANTONESE-GPT-Redo'}
+ Output: ['中性'] 
+ Execution time: 0.806699275970459 seconds
+127.0.0.1 - - [23/Jul/2024 11:30:05] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'INITIALIZE-SESSION-CANTONESE-GPT-Redo'}
+ Output: ['中性'] 
+ Execution time: 0.042516231536865234 seconds
+127.0.0.1 - - [23/Jul/2024 11:31:38] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'INITIALIZE-SESSION-CANTONESE-GPT-Redo'}
+ Output: ['中性'] 
+ Execution time: 0.043615102767944336 seconds
+127.0.0.1 - - [23/Jul/2024 11:34:02] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'no response after a long time (say 10 seconds)'}
+ Output: ['消极'] 
+ Execution time: 0.053675174713134766 seconds
+127.0.0.1 - - [23/Jul/2024 11:34:26] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'INITIALIZE-SESSION-CANTONESE-GPT-Redo'}
+ Output: ['中性'] 
+ Execution time: 0.04706621170043945 seconds
+127.0.0.1 - - [23/Jul/2024 11:37:22] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'INITIALIZE-SESSION-CANTONESE-GPT-Redo'}
+ Output: ['中性'] 
+ Execution time: 0.042113542556762695 seconds
+127.0.0.1 - - [23/Jul/2024 11:38:20] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'no response after a long time (say 10 seconds)'}
+ Output: ['消极'] 
+ Execution time: 0.04527616500854492 seconds
+127.0.0.1 - - [23/Jul/2024 11:38:43] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '你覺得呢個症狀有幾嚴重？0係<prosody rate="slow">完全冇</prosody>，5係<prosody rate="slow">最嚴重</prosody>。', 'user_input': 'please repeat'}
+ Output: ['消极'] 
+ Execution time: 0.03737282752990723 seconds
+127.0.0.1 - - [23/Jul/2024 11:38:57] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '你啱啱講嘅嘢我聽唔清楚，可唔可以再講一次？0係完全冇，5係最嚴重。', 'user_input': 'please repeat'}
+ Output: ['消极'] 
+ Execution time: 0.038288116455078125 seconds
+127.0.0.1 - - [23/Jul/2024 11:39:12] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '對唔住，我仲係聽唔清楚。你可以再講一次嗎？0係完全冇，5係最嚴重。', 'user_input': 'no response after a long time (say 10 seconds)'}
+ Output: ['消极'] 
+ Execution time: 0.042498111724853516 seconds
+127.0.0.1 - - [23/Jul/2024 11:39:28] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'INITIALIZE-SESSION-CANTONESE-GPT-Redo'}
+ Output: ['中性'] 
+ Execution time: 0.035073280334472656 seconds
+127.0.0.1 - - [23/Jul/2024 11:39:42] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'please repeat'}
+ Output: ['中性'] 
+ Execution time: 0.04243206977844238 seconds
+127.0.0.1 - - [23/Jul/2024 11:40:08] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '唔好意思，啱啱聽唔清楚。你可以再講一次你嘅咳嗽情況，用0到5評分？', 'user_input': '冇咳素'}
+ Output: ['消极'] 
+ Execution time: 0.03455495834350586 seconds
+127.0.0.1 - - [23/Jul/2024 11:40:22] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '明白，冇咳嗽。咁你有冇痰？0係<prosody rate="slow">完全冇</prosody>，5係<prosody rate="slow">好多</prosody>。', 'user_input': '冇痰'}
+ Output: ['中性'] 
+ Execution time: 0.040720224380493164 seconds
+127.0.0.1 - - [23/Jul/2024 11:40:36] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '明白，0，即係冇痰。你有冇胸口焗住嘅感覺？0係<prosody rate="slow">完全冇</prosody>，5係<prosody rate="slow">好焗住</prosody>。', 'user_input': '冇呀唔好'}
+ Output: ['中性'] 
+ Execution time: 0.03888201713562012 seconds
+127.0.0.1 - - [23/Jul/2024 11:40:51] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '明白，0，即係冇焗住嘅感覺。你行斜路或者樓梯有冇氣促？0係<prosody rate="slow">完全冇</prosody>，5係<prosody rate="slow">好氣促</prosody>。', 'user_input': '冇呀你'}
+ Output: ['消极'] 
+ Execution time: 0.049256324768066406 seconds
+127.0.0.1 - - [23/Jul/2024 11:41:09] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '明白，0，即係完全冇氣促。你行屋企嘅時候有冇困難？0係<prosody rate="slow">完全冇</prosody>，5係<prosody rate="slow">好困難</prosody>。', 'user_input': '冇咳呀'}
+ Output: ['中性'] 
+ Execution time: 0.04246377944946289 seconds
+127.0.0.1 - - [23/Jul/2024 11:41:26] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '我明白，請問你行屋企嘅時候，有冇困難？0係完全冇，5係好困難。請用數字形容一下。', 'user_input': '你呃冇呀'}
+ Output: ['消极'] 
+ Execution time: 0.03642392158508301 seconds
+127.0.0.1 - - [23/Jul/2024 11:41:41] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '我明白，但請你用數字講下，你行屋企嘅時候有幾困難？0係完全冇，5係好困難。', 'user_input': '你冇呀你'}
+ Output: ['消极'] 
+ Execution time: 0.03827357292175293 seconds
+127.0.0.1 - - [23/Jul/2024 11:41:56] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '我明白，但係要我幫你評估，你用數字形容一下，行屋企嘅時候有幾困難呀？0係完全冇，5係好困難。', 'user_input': '零毛菌難'}
+ Output: ['消极'] 
+ Execution time: 0.04961419105529785 seconds
+127.0.0.1 - - [23/Jul/2024 11:42:12] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '明白，咁我哋讲下你出街嘅信心，0係冇信心，5係好有信心。请用數字形容一下。', 'user_input': '好有誠信呀'}
+ Output: ['积极'] 
+ Execution time: 0.030568838119506836 seconds
+127.0.0.1 - - [23/Jul/2024 11:42:28] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '唔好意思，我意思係你出街嘅信心，0係好有信心，5係完全冇信心。你會揀幾多？', 'user_input': '你'}
+ Output: ['消极'] 
+ Execution time: 0.04127788543701172 seconds
+127.0.0.1 - - [23/Jul/2024 11:42:41] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '唔緊要，我再講一次啦，0係好有信心出街，5係完全冇信心出街。你會揀幾多？', 'user_input': 'no response after a long time (say 10 seconds)'}
+ Output: ['消极'] 
+ Execution time: 0.0543973445892334 seconds
+127.0.0.1 - - [23/Jul/2024 11:42:57] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '唔緊要，我再解释一下，0係好有信心出街，譬如你可以隨時出街；5係完全冇信心出街，譬如你完全唔想出街。你會揀幾多？', 'user_input': '你'}
+ Output: ['消极'] 
+ Execution time: 0.06371235847473145 seconds
+127.0.0.1 - - [23/Jul/2024 11:43:16] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '唔緊要，我哋講下你嘅瞓覺情況。你覺得你瞓得好唔好？', 'user_input': 'no response after a long time (say 10 seconds)'}
+ Output: ['消极'] 
+ Execution time: 0.08022737503051758 seconds
+127.0.0.1 - - [23/Jul/2024 11:43:31] "POST /predict HTTP/1.1" 200 -
+^C(LLM_DM) grace_team@EE4E170:~/HKUST_GRACE/Grace_Project/Grace_TurnManager/utils$ ^C
+(LLM_DM) grace_team@EE4E170:~/HKUST_GRACE/Grace_Project/Grace_TurnManager/utils$ python sentiment_analysis.py 
+You are using the default legacy behaviour of the <class 'transformers.models.t5.tokenization_t5.T5Tokenizer'>. This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thoroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565
+/home/grace_team/miniconda3/envs/LLM_DM/lib/python3.11/site-packages/torch/_utils.py:776: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
+  return self.fget.__get__(instance, owner)()
+ * Serving Flask app 'sentiment_analysis'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:12344
+ * Running on http://192.168.99.243:12344
+Press CTRL+C to quit
+ * Restarting with stat
+You are using the default legacy behaviour of the <class 'transformers.models.t5.tokenization_t5.T5Tokenizer'>. This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thoroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565
+/home/grace_team/miniconda3/envs/LLM_DM/lib/python3.11/site-packages/torch/_utils.py:776: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
+  return self.fget.__get__(instance, owner)()
+ * Debugger is active!
+ * Debugger PIN: 119-255-735
+Input: 判断以下对问题回答的情感极性: {'ai_question': '唔好意思，啱啱聽唔清楚。你可以再講一次你嘅咳嗽情況，用0到5評分？', 'user_input': '冇咳素'}
+ Output: ['消极'] 
+ Execution time: 0.34397339820861816 seconds
+127.0.0.1 - - [23/Jul/2024 11:54:19] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '唔好意思，啱啱聽唔清楚。你可以再講一次你嘅咳嗽情況，用0到5評分？', 'user_input': '冇咳'}
+ Output: ['中性'] 
+ Execution time: 0.04616141319274902 seconds
+127.0.0.1 - - [23/Jul/2024 11:54:36] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '唔好意思，啱啱聽唔清楚。你可以再講一次你嘅咳嗽情況，用0到5評分？', 'user_input': '冇咳素'}
+ Output: ['消极'] 
+ Execution time: 0.041098594665527344 seconds
+127.0.0.1 - - [23/Jul/2024 11:54:41] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '唔好意思，啱啱聽唔清楚。你可以再講一次你嘅咳嗽情況，用0到5評分？', 'user_input': '冇咳嗽'}
+ Output: ['中性'] 
+ Execution time: 0.06698393821716309 seconds
+127.0.0.1 - - [23/Jul/2024 11:54:46] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '唔好意思，啱啱聽唔清楚。你可以再講一次你嘅咳嗽情況，用0到5評分？', 'user_input': '冇咳素'}
+ Output: ['消极'] 
+ Execution time: 0.03589367866516113 seconds
+127.0.0.1 - - [23/Jul/2024 11:54:52] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'INITIALIZE-SESSION-CANTONESE-GPT-Redo'}
+ Output: ['中性'] 
+ Execution time: 0.04958605766296387 seconds
+127.0.0.1 - - [23/Jul/2024 11:55:21] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'no response after a long time (say 10 seconds)'}
+ Output: ['消极'] 
+ Execution time: 0.052841901779174805 seconds
+127.0.0.1 - - [23/Jul/2024 11:55:48] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '唔緊要，唔該你幫我評分下你嘅呢個症狀，0至5，0係完全冇問題，5係最嚴重。可以俾個分我聽吓嗎？', 'user_input': 'no response after a long time (say 10 seconds)'}
+ Output: ['消极'] 
+ Execution time: 0.04341268539428711 seconds
+127.0.0.1 - - [23/Jul/2024 11:56:07] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': '好呀'}
+ Output: ['中性'] 
+ Execution time: 0.03921675682067871 seconds
+127.0.0.1 - - [23/Jul/2024 11:56:11] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'revert previous intent due to barge in'}
+ Output: ['消极'] 
+ Execution time: 0.036899566650390625 seconds
+127.0.0.1 - - [23/Jul/2024 11:56:17] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'INITIALIZE-SESSION-CANTONESE-GPT-Redo'}
+ Output: ['中性'] 
+ Execution time: 0.04773569107055664 seconds
+127.0.0.1 - - [23/Jul/2024 11:59:20] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': '好呀'}
+ Output: ['中性'] 
+ Execution time: 0.04409170150756836 seconds
+127.0.0.1 - - [23/Jul/2024 11:59:59] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'INITIALIZE-SESSION-CANTONESE-GPT-Redo'}
+ Output: ['中性'] 
+ Execution time: 0.045688629150390625 seconds
+127.0.0.1 - - [23/Jul/2024 12:01:34] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'INITIALIZE-SESSION-CANTONESE-GPT-Redo'}
+ Output: ['中性'] 
+ Execution time: 0.043431758880615234 seconds
+127.0.0.1 - - [23/Jul/2024 12:01:59] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'INITIALIZE-SESSION-CANTONESE-GPT-Redo'}
+ Output: ['中性'] 
+ Execution time: 0.04147529602050781 seconds
+127.0.0.1 - - [23/Jul/2024 12:03:01] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'INITIALIZE-SESSION-CANTONESE-GPT-Redo'}
+ Output: ['中性'] 
+ Execution time: 0.046811819076538086 seconds
+127.0.0.1 - - [23/Jul/2024 12:03:51] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': '好呀'}
+ Output: ['中性'] 
+ Execution time: 0.041832685470581055 seconds
+127.0.0.1 - - [23/Jul/2024 12:04:20] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'INITIALIZE-SESSION-CANTONESE-GPT-Redo'}
+ Output: ['中性'] 
+ Execution time: 0.04894685745239258 seconds
+127.0.0.1 - - [23/Jul/2024 12:06:06] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'no response after a long time (say 10 seconds)'}
+ Output: ['消极'] 
+ Execution time: 0.04491591453552246 seconds
+127.0.0.1 - - [23/Jul/2024 12:06:30] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '你好，請問你可以用0到5嚟評估你嘅症狀嗎？0係完全冇問題，5係最嚴重嘅情況。', 'user_input': '好呀'}
+ Output: ['中性'] 
+ Execution time: 0.04921245574951172 seconds
+127.0.0.1 - - [23/Jul/2024 12:06:45] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '咁你覺得你嘅咳嗽有幾嚴重？0係完全冇問題，5係成日都咳。', 'user_input': '成日都卡'}
+ Output: ['消极'] 
+ Execution time: 0.03575849533081055 seconds
+127.0.0.1 - - [23/Jul/2024 12:06:59] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'INITIALIZE-SESSION-CANTONESE-GPT-Redo'}
+ Output: ['中性'] 
+ Execution time: 0.05336904525756836 seconds
+127.0.0.1 - - [23/Jul/2024 12:09:28] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'please repeat'}
+ Output: ['中性'] 
+ Execution time: 0.046613216400146484 seconds
+127.0.0.1 - - [23/Jul/2024 12:09:45] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'INITIALIZE-SESSION-CANTONESE-GPT-Redo'}
+ Output: ['中性'] 
+ Execution time: 0.037476539611816406 seconds
+127.0.0.1 - - [23/Jul/2024 12:10:01] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': '好呀'}
+ Output: ['中性'] 
+ Execution time: 0.04323625564575195 seconds
+127.0.0.1 - - [23/Jul/2024 12:10:34] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '咁你呢排咳幾多？0係完全冇咳，5係成日咳。', 'user_input': '多到死呀好辛苦呀'}
+ Output: ['消极'] 
+ Execution time: 0.03947877883911133 seconds
+127.0.0.1 - - [23/Jul/2024 12:10:47] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '明白，5，咁你真係好辛苦。咁你有冇痰多？0係<prosody rate="slow">冇痰</prosody>，5係<prosody rate="slow">好多痰</prosody>。', 'user_input': '冇乜痰呀'}
+ Output: ['中性'] 
+ Execution time: 0.04397869110107422 seconds
+127.0.0.1 - - [23/Jul/2024 12:11:06] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '明白，你可以再講清楚啲，你覺得你嘅痰係幾多？0係冇痰，5係好多痰。', 'user_input': '一呀'}
+ Output: ['中性'] 
+ Execution time: 0.04021906852722168 seconds
+127.0.0.1 - - [23/Jul/2024 12:11:19] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '明白，一，咁你痰唔多。你有冇胸口焗住？0係<prosody rate="slow">唔焗住</prosody>，5係<prosody rate="slow">好焗住</prosody>。', 'user_input': '零呀'}
+ Output: ['消极'] 
+ Execution time: 0.041973114013671875 seconds
+127.0.0.1 - - [23/Jul/2024 12:11:35] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': 'INITIALIZE-SESSION-CANTONESE-GPT-Redo'}
+ Output: ['中性'] 
+ Execution time: 0.04737687110900879 seconds
+127.0.0.1 - - [23/Jul/2024 12:18:26] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '', 'user_input': '哦好呀'}
+ Output: ['积极'] 
+ Execution time: 0.038222312927246094 seconds
+127.0.0.1 - - [23/Jul/2024 12:18:59] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '咁你覺得你最近幾耐咳一次？0係<prosody rate="slow">冇咳</prosody>，5係<prosody rate="slow">成日咳</prosody>。', 'user_input': '冇咳呀阿玲呀'}
+ Output: ['消极'] 
+ Execution time: 0.03582262992858887 seconds
+127.0.0.1 - - [23/Jul/2024 12:19:11] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '明白，0，咁你好似冇咳哦。你覺得有冇痰？0係冇嘅，5係好多痰。', 'user_input': '四呀'}
+ Output: ['中性'] 
+ Execution time: 0.03900337219238281 seconds
+127.0.0.1 - - [23/Jul/2024 12:19:26] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '明白，4，咁你有几多痰。你有冇感觉胸口闷？0係<prosody rate="slow">冇闷</prosody>，5係<prosody rate="slow">好闷</prosody>。', 'user_input': '我唔記得喇'}
+ Output: ['消极'] 
+ Execution time: 0.05591011047363281 seconds
+127.0.0.1 - - [23/Jul/2024 12:19:45] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '唔记得冇问题，你依家感觉胸口闷唔闷？0係冇闷，5係好闷。', 'user_input': '我喺邊度呀依家'}
+ Output: ['消极'] 
+ Execution time: 0.040331125259399414 seconds
+127.0.0.1 - - [23/Jul/2024 12:19:59] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '你依家感觉胸口有冇闷？0係冇闷，5係好闷。', 'user_input': '我真係答唔到你呀'}
+ Output: ['消极'] 
+ Execution time: 0.03566455841064453 seconds
+127.0.0.1 - - [23/Jul/2024 12:20:11] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '好，我哋转个话题，你行上斜坡同楼梯嗰阵会唔会气喘？0係<prosody rate="slow">唔喘</prosody>，5係<prosody rate="slow">好喘</prosody>。', 'user_input': '我真係唔記得呀'}
+ Output: ['中性'] 
+ Execution time: 0.044133901596069336 seconds
+127.0.0.1 - - [23/Jul/2024 12:20:28] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '試下再諗下，你行樓梯嗰陣，有冇覺得好喘？0係唔喘，5係好喘。', 'user_input': '我真係諗唔到呀'}
+ Output: ['消极'] 
+ Execution time: 0.03719782829284668 seconds
+127.0.0.1 - - [23/Jul/2024 12:20:41] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '你覺得你行上斜坡或者樓梯時係咪會氣喘？試下用0至5嚟形容，0係唔喘，5係好喘。', 'user_input': '試唔到呀唔得呀'}
+ Output: ['消极'] 
+ Execution time: 0.04737401008605957 seconds
+127.0.0.1 - - [23/Jul/2024 12:20:57] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '明白，咁不如我哋讲下你喺屋企活动嗰阵，有冇觉得困难？0係<prosody rate="slow">冇困难</prosody>，5係<prosody rate="slow">好困难</prosody>。', 'user_input': '我真係唔記得呀'}
+ Output: ['消极'] 
+ Execution time: 0.0391087532043457 seconds
+127.0.0.1 - - [23/Jul/2024 12:21:14] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '唔紧要，咁例如你喺屋企行去厨房嗰阵，有冇觉得困难？0係冇困难，5係好困难。', 'user_input': '我真係冇辦法記得啦'}
+ Output: ['消极'] 
+ Execution time: 0.03626251220703125 seconds
+127.0.0.1 - - [23/Jul/2024 12:21:30] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '唔紧要，咁例如你由客厅行去厕所，0係冇困难，5係好困难，你会点评分？', 'user_input': '聽唔到呀唔知呀'}
+ Output: ['消极'] 
+ Execution time: 0.035407304763793945 seconds
+127.0.0.1 - - [23/Jul/2024 12:21:43] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '唔紧要，例如你喺屋企上楼梯嗰阵，0係冇困难，5係好困难，你会点评分？', 'user_input': '唔得呀完全唔知呀'}
+ Output: ['消极'] 
+ Execution time: 0.03688669204711914 seconds
+127.0.0.1 - - [23/Jul/2024 12:21:57] "POST /predict HTTP/1.1" 200 -
+Input: 判断以下对问题回答的情感极性: {'ai_question': '明白，唔緊要啦。咁你出去街嗰阵，有冇信心？0係<prosody rate="slow">冇信心</prosody>，5係<prosody rate="slow">好有信心</prosody>。', 'user_input': '我答唔到你呀我唔記得啦'}
+ Output: ['中性'] 
+ Execution time: 0.04350471496582031 seconds
+127.0.0.1 - - [23/Jul/2024 12:22:16] "POST /predict HTTP/1.1" 200 -
