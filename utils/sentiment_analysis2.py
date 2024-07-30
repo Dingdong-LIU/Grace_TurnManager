@@ -13,7 +13,7 @@ prompt = PromptTemplate(
 langchain_llm = ChatOpenAI(
     base_url="http://localhost:8000/v1",
     api_key="No Need",
-    model="Qwen/Qwen2-7B-Instruct-GPTQ-Int8",
+    model="Qwen/Qwen2-7B-Instruct-GPTQ-Int4",
     verbose=True,
 )
 
