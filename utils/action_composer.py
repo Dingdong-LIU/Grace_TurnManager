@@ -52,8 +52,8 @@ class ActionComposer:
                 "next_question_with_tone", None
             )
             if chatbot_reply_text is None:
-
-                chatbot_reply_text = response["responses"]["next_question_text"]
+                chatbot_reply_text = response["responses"].get("next_question_text","")
+                
         return chatbot_reply_text
 
     def parse_reply_from_chatbot(self, res: dict):
